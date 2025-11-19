@@ -1,0 +1,652 @@
+{
+  "categories": [
+    {
+      "id": "biblia",
+      "name": "Biblia",
+      "icon": "📖",
+      "color": "#8B5CF6"
+    }
+  ],
+  "questions": [
+    {
+      "id": 1,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Qué condición precede a que las naciones vean a Israel como cabeza y no como cola?",
+      "options": [
+        "Que oigas la voz del SEÑOR tu Dios y guardes sus mandamientos",
+        "Que conquisten nuevas tierras para establecer su dominio",
+        "Que ofrezcan sacrificios adicionales en el templo",
+        "Que formen alianzas con las naciones vecinas"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:1"
+    },
+    {
+      "id": 2,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Cómo se describe el efecto de la obediencia sobre la descendencia, los bienes y las actividades del pueblo?",
+      "options": [
+        "Vendrán sobre ti todas estas bendiciones y te alcanzarán por tu obediencia",
+  "Aumentarán las posesiones sin implicar cambios en la descendencia",
+        "Se limitarán las bendiciones a favor de los sacerdotes",
+        "Aparecerán bendiciones temporales que pronto se esfuman"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:2"
+    },
+    {
+      "id": 3,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿En qué ámbitos concretos se promete bendición al pueblo obediente?",
+      "options": [
+        "En la ciudad y en el campo",
+        "Únicamente en los lugares de culto",
+  "Principalmente en sus cosechas",
+        "En la esfera familiar"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:3"
+    },
+    {
+      "id": 4,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Qué elementos de la vida agrícola y familiar se mencionan como bendecidos?",
+      "options": [
+        "Bendecirá tu descendencia, tu grano, tu vino y tu aceite y la cría de tu ganado",
+  "Bendecirá principalmente la descendencia sin detallar productos",
+        "Promete prosperidad en tiempos de paz",
+        "Asegura abundancia temporal sujeta a condiciones humanas"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:4-5"
+    },
+    {
+      "id": 5,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Cómo describe el pasaje la manera en que caminará el pueblo respecto a sus enemigos y su prosperidad?",
+      "options": [
+        "Caminando seguro y sin temor, venciendo a tus enemigos",
+        "Caminando con humildad y sumisión ante todas las naciones",
+        "Permaneciendo en cautela y evitando la prosperidad",
+        "Sufriendo derrotas estratégicas pero conservando la fe"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:6-7"
+    },
+    {
+      "id": 6,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Qué acción se promete contra los enemigos del pueblo obediente?",
+      "options": [
+        "Los enemigos serán puestos bajo tu planta y huirán ante ti",
+        "Los enemigos serán derrotados pero no humillados",
+        "Los enemigos permanecerán neutrales respecto a Israel",
+        "Las naciones extranjeras impondrán tributo sin someterse"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:7"
+    },
+    {
+      "id": 7,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Qué resultado específico se afirma respecto a la bendición sobre lo que entra y sale del pueblo?",
+      "options": [
+        "El SEÑOR te enviará bendición en tu almacén y en todo lo que emprendas",
+  "La bendición se manifestará en actos religiosos y civiles",
+        "La bendición será visible en la esfera privada",
+        "Se promete bendición limitada a actividades militares"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:8"
+    },
+    {
+      "id": 8,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Cómo se expresa la promesa de confirmación del pacto y exaltación para quienes temen al SEÑOR?",
+      "options": [
+        "El SEÑOR confirmará tu pacto y te exaltará entre los pueblos",
+  "La confirmación del pacto afectará a la comunidad, no exclusivamente a los sacerdotes",
+        "La confirmación del pacto será simbólica sin efecto práctico",
+        "La exaltación será temporal y limitada a la élite"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:9-10"
+    },
+    {
+      "id": 9,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Qué promesa económica se hace respecto a préstamos y al suministro de lluvia?",
+      "options": [
+        "Prestarás a muchas naciones y no pedirás prestado; el SEÑOR enviará la lluvia a tu tierra",
+        "Se limitará el acceso al préstamo a los sacerdotes",
+        "La prosperidad económica podrá depender de litigios exitosos",
+        "Las lluvias serán inciertas pero las cosechas fiables"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:11-12"
+    },
+    {
+      "id": 10,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Qué metáfora se usa para describir la posición de Israel entre las naciones si guarda los mandamientos?",
+      "options": [
+        "Será cabeza y no cola",
+        "Será raíz en vez de rama",
+        "Será luz en lugar de sombra",
+        "Será torre en vez de muralla"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:13"
+    },
+    {
+      "id": 11,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Qué prohibición se establece respecto a añadir o quitar mandamientos?",
+      "options": [
+        "No agregarás ni quitarás de los mandamientos que yo te encomiendo",
+        "No modificarás los rituales del templo según costumbres locales",
+        "No introducirás leyes civiles que compitan con las religiosas",
+        "No consultarás a profetas externos en tiempos de paz"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:14"
+    },
+    {
+      "id": 12,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Cuál es la fórmula inicial que introduce la lista de maldiciones por la desobediencia?",
+      "options": [
+        "Si no obedeces la voz del SEÑOR, vendrán sobre ti todas estas maldiciones",
+        "Si ignoras a los profetas, algunas maldiciones te afectarán",
+        "Si pecas de forma privada, tu familia sufrirá",
+        "Si pierdes la guerra, serás reprimido por la nación vencedora"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:15"
+    },
+    {
+      "id": 13,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Cómo se expresa la maldición relacionada con la fertilidad de la tierra y el pan?",
+      "options": [
+        "Maldecirá tu pan, tu grano y tu fruto y te faltará sustento",
+        "Se refiere principalmente a pérdidas económicas sin mencionar el pan",
+        "Se refiere también a la esterilidad humana",
+        "La maldición es simbólica sin alusión a cosechas"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:16-17"
+    },
+    {
+      "id": 14,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Qué se advierte respecto a la descendencia y los bienes en caso de desobediencia?",
+      "options": [
+        "Serás maldito en tu descendencia, en tus graneros y en todo lo que emprendas",
+        "La maldición afectará también a tu herencia terrenal",
+        "La advertencia se dirige exclusivamente a los líderes",
+        "La maldición se aplicará únicamente durante la guerra"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:18"
+    },
+    {
+      "id": 15,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Qué consecuencias climáticas y agrícolas se vinculan con la desobediencia?",
+      "options": [
+        "Enfermedades, escasez de lluvia y pérdida de cosechas",
+        "Plagas de insectos sin mención de la lluvia",
+        "Condiciones atmosféricas inciertas pero cosechas estables",
+        "Un ciclo natural que no guarda relación con la obediencia"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:20-22"
+    },
+    {
+      "id": 16,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Qué dolencias y pestilencias se enumeran como consecuencias de la desobediencia?",
+      "options": [
+        "Enfermedades dolorosas y pestilencias que afligen al cuerpo",
+        "Castigos exclusivamente económicos sin mención de salud",
+        "Sufrimientos simbólicos sin manifestación física",
+        "Problemas temporales que no afectan a las generaciones siguientes"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:22-27"
+    },
+    {
+      "id": 17,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Qué alteraciones mentales y sociales se describen como resultado de la maldición?",
+      "options": [
+        "Confusión mental y vergüenza pública delante de naciones extrañas",
+        "Aislamiento social sin pérdida de prestigio",
+        "Incremento de sabiduría individual pero pérdida colectiva",
+        "Fortaleza mental frente a desafíos sociales"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:28-29"
+    },
+    {
+      "id": 18,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Qué tipo de humillación pública y señales se describen como parte de la maldición?",
+      "options": [
+        "Serás superado en comer y beber por tu enemigo y tu bandera será burlada",
+  "Pérdida de patrimonio acompañada de consecuencias públicas",
+        "Separación interna sin repercusión internacional",
+        "Derrota militar sin pérdida simbólica"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:30-31"
+    },
+    {
+      "id": 19,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Qué se afirma sobre la pérdida de la posteridad y la impotencia ante la toma de hijos?",
+      "options": [
+        "Tus hijos serán tomados ante sus ojos y te mirarás sin fuerza para remediarlo",
+        "Serán trasladados pero con posibilidad de rescate inmediato",
+        "No habrá impacto en las relaciones familiares; afectará principalmente a los bienes materiales",
+        "Se refiere a una separación simbólica sin consecuencias reales"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:32-33"
+    },
+    {
+      "id": 20,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Cómo se describe la reacción de las naciones ante la desgracia del pueblo?",
+      "options": [
+        "Serás objeto de asombro y de horror entre todas las naciones por tu suerte",
+  "Provocarás reacciones de compasión y de juicio entre las naciones",
+        "No habrá reacción internacional significativa",
+        "Serás admirado por la resistencia pese a la adversidad"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:34-35"
+    },
+    {
+      "id": 21,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Qué significa convertirse en objeto de maldición y señal según el pasaje?",
+      "options": [
+        "Serás sobrepuesto como una maldición y todos se burlarán de ti",
+        "Serás separado religiosamente pero mantendrás respeto social",
+  "Sufrirás sanciones económicas acompañadas de descrédito",
+        "La maldición será privada y no visible públicamente"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:36"
+    },
+    {
+      "id": 22,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Qué implica que el pueblo se convierta en proverbio o refrán entre las naciones?",
+      "options": [
+        "Que serás objeto de burla y refranes entre las naciones",
+        "Que serás exaltado en proverbios de sabiduría",
+        "Que serás mencionado principalmente en contextos religiosos positivos",
+        "Que no habrá memoria nacional respecto a tu pueblo"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:37"
+    },
+    {
+      "id": 23,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Cómo describe el texto las consecuencias para la siembra y el ganado en tiempos de maldición?",
+      "options": [
+        "Sembrarás pero no recogerás y tendrás animales en poca cantidad",
+  "Perderás cosechas y la disminución del ganado se hará evidente",
+  "La referencia es a prácticas agrícolas no productivas",
+  "Se promete recuperación posterior sin coste"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:38-40"
+    },
+    {
+      "id": 24,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Qué detalle se ofrece sobre la servidumbre y la falta de provecho en el trabajo?",
+      "options": [
+        "Servirás a tus enemigos con hambre y trabajarás sin provecho",
+  "Algunos serán forzados al servicio y experimentarán privaciones",
+        "Se trata de una metáfora sin implicación económica",
+        "La servidumbre será de carácter temporal y honorífica"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:41-42"
+    },
+    {
+      "id": 25,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Qué se describe respecto a la dependencia y trato con extranjeros en tiempos de maldición?",
+      "options": [
+        "Los extranjeros te consumirán y serás siervo de ellos",
+        "Habrá interacción comercial justa pero no dominación",
+  "Comerciantes y otras figuras foráneas pasarán a dominar la economía",
+        "La referencia es a aliancias políticas que perduran"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:43-44"
+    },
+    {
+      "id": 26,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Qué finalidad se atribuye a las señales y prodigios que acompañan la maldición?",
+      "options": [
+        "Serán señales y prodigios destinados a humillarte por tu desobediencia",
+        "Serán pruebas de la justicia humana sin propósito específico",
+        "Servirán como signos de advertencia para las generaciones",
+        "Actuarán como recordatorios dirigidos a los sacerdotes"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:45-46"
+    },
+    {
+      "id": 27,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Qué causa se indica para la servidumbre que el pueblo experimentará como castigo?",
+      "options": [
+        "Por no haber servido al SEÑOR con alegría y corazón sincero",
+        "Por falta de preparación militar ante amenazas",
+        "Por errores administrativos internos",
+        "Por catástrofes naturales fuera de control"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:47-48"
+    },
+    {
+      "id": 28,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Cómo se describe la nación que vendrá de lejos para invadir o castigar al pueblo?",
+      "options": [
+        "Nación cuya lengua no entenderás que invade con rapidez",
+        "Nación aliada que traerá paz y progreso",
+        "Nación que ofrecerá enseñanza y sabiduría",
+        "Nación mercantil que favorecerá el comercio"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:49"
+    },
+    {
+      "id": 29,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Cómo se resume la amenaza que acompaña a la invasión en términos de crueldad y hambre?",
+      "options": [
+        "Traerán aflicciones, hambre y maldición en armas y pestilencia",
+        "Provocarán trastornos menores sin llegar a causar hambruna",
+  "Impondrán tributos y ejercerán presión coercitiva",
+        "La amenaza será simbólica y no literal"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:50-51"
+    },
+    {
+      "id": 30,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Qué escenario extremo de hambre y desesperación describe el pasaje en tiempos de asedio?",
+      "options": [
+        "Comerán la carne de sus hijos por la desesperación en asedio",
+  "Se producirá migración masiva acompañada de sufrimiento",
+        "Se perderá la fe sin consecuencias físicas",
+  "También los pobladores locales sufrirán hambre extrema"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:52-53"
+    },
+    {
+      "id": 31,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Qué situaciones de coerción y actos inmorales bajo hambre y cautiverio se describen?",
+      "options": [
+        "Mujeres forzadas a actos impuros por hambre y desesperación",
+  "Habrá separación de familias y otras formas de sufrimiento social",
+        "La descripción es figurativa y no literal",
+        "Se trata de una advertencia exclusivamente moral"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:54-57"
+    },
+    {
+      "id": 32,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Qué condición provoca juramentos, lamentaciones y ruegos?",
+      "options": [
+        "La falta de cumplimiento de las palabras del SEÑOR y la maldición subsiguiente",
+        "Un conflicto diplomático con naciones vecinas",
+        "Errores administrativos internos",
+        "Un periodo de enfermedad sin relación con juramentos"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:58-59"
+    },
+    {
+      "id": 33,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Cómo se describe la multiplicación de plagas y enfermedades sobre el pueblo?",
+      "options": [
+        "Multiplicaré sobre ti plagas y enfermedades sin número",
+  "Se multiplicarán diversas aflicciones que afectarán a la población",
+        "Las aflicciones serán intermitentes y controlables",
+        "Serán aflicciones personales sin efecto comunitario"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:60-61"
+    },
+    {
+      "id": 34,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+  "question": "¿Qué imagen utiliza el pasaje para describir la pérdida de posteridad y memoria del pueblo?",
+      "options": [
+        "Tus descendientes serán pocos como la arena y serán tomados",
+  "Se perderá la población en masa, no únicamente los líderes",
+        "La imagen es sobre bienes materiales no sobre posteridad",
+        "Se refiere a una pérdida espiritual sin descendencia física"
+      ],
+      "correctAnswer": 0,
+  "timeLimit": 35,
+      "reference": "Deuteronomio 28:62"
+    },
+    {
+      "id": 35,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+      "question": "¿Qué acción divina se describe como causa de la dispersión del pueblo entre las naciones?",
+      "options": [
+        "Yo os esparciré entre las naciones y allí serviréis a dioses extraños",
+        "Seréis invitados a emigrar por prosperidad económica",
+        "La dispersión será voluntaria por deseo de expansión",
+        "Amplios sectores de la población serán desplazados por periodos prolongados"
+      ],
+      "correctAnswer": 0,
+      "timeLimit": 35,
+      "reference": "Deuteronomio 28:63-64"
+    },
+    {
+      "id": 36,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+      "question": "¿Qué consecuencias de temor y falta de reposo se describen para el pueblo disperso entre las naciones?",
+      "options": [
+        "Temerás de día y de noche y no tendrás reposo ni seguridad",
+        "El temor será constante y no limitado a campañas militares",
+        "Los temores serán limitados a liderazgos sin efecto popular",
+        "Se experimentará ansiedad individual sin impacto comunitario"
+      ],
+      "correctAnswer": 0,
+      "timeLimit": 35,
+      "reference": "Deuteronomio 28:65-66"
+    },
+    {
+      "id": 37,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+      "question": "¿Qué imagen final sobre deportación y venta como esclavos ofrece el pasaje al concluir el capítulo?",
+      "options": [
+        "Serás llevado de regreso a Egipto con barcos y allí serás vendido",
+        "Se promete una repatriación sin comercio ni venta",
+        "Se habla de deportación sin mención de transporte marítimo",
+        "El exilio incluirá transporte y venta como esclavos en el extranjero"
+      ],
+      "correctAnswer": 0,
+      "timeLimit": 35,
+      "reference": "Deuteronomio 28:67-68"
+    },
+    {
+      "id": 38,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+      "question": "¿Cuál es el principio teológico central que articula el capítulo en su conjunto?",
+      "options": [
+        "La obediencia al pacto produce bendición y la desobediencia produce maldición",
+        "La prosperidad depende predominantemente de la fuerza militar",
+        "La religión puede desvincularse de las consecuencias sociales",
+        "Las prácticas cultuales están directamente vinculadas al favor divino"
+      ],
+      "correctAnswer": 0,
+      "timeLimit": 35,
+      "reference": "Deuteronomio 28:1-68"
+    },
+    {
+      "id": 39,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+      "question": "¿Qué vínculo se establece entre la práctica cultual correcta y la estabilidad de la nación?",
+      "options": [
+        "El culto correcto asegura la presencia y favor de Dios que sostiene la nación",
+        "El culto correcto puede resultar irrelevante frente a factores políticos",
+        "La estabilidad nacional proviene principalmente de la diplomacia",
+        "La práctica cultual produce legitimidad ritual que contribuye a la seguridad"
+      ],
+      "correctAnswer": 0,
+      "timeLimit": 35,
+      "reference": "Deuteronomio 28:1-14"
+    },
+    {
+      "id": 40,
+      "category": "biblia",
+      "difficulty": "expert",
+      "points": 200,
+      "question": "¿Qué resultado global se promete ante la fidelidad al pacto?",
+      "options": [
+        "Bendición integral: prosperidad, liderazgo y protección por parte del SEÑOR",
+        "Recompensas que abarcarán tanto a individuos como a la comunidad",
+        "Mejoras litúrgicas acompañadas por efectos materiales",
+        "Favores concentrados en la élite religiosa"
+      ],
+      "correctAnswer": 0,
+      "timeLimit": 35,
+      "reference": "Deuteronomio 28:1-14"
+    }
+  ]
+}

@@ -1,0 +1,223 @@
+{
+  "categories": [
+    {
+      "id": "cultura-general",
+      "name": "Cultura General",
+      "icon": "🌍",
+      "color": "#3B82F6"
+    },
+    {
+      "id": "ciencia",
+      "name": "Ciencia",
+      "icon": "🔬",
+      "color": "#10B981"
+    },
+    {
+      "id": "biblia",
+      "name": "Biblia",
+      "icon": "📖",
+      "color": "#8B5CF6"
+    },
+    {
+      "id": "historia",
+      "name": "Historia",
+      "icon": "🏛️",
+      "color": "#F59E0B"
+    },
+    {
+      "id": "deportes",
+      "name": "Deportes",
+      "icon": "⚽",
+      "color": "#EF4444"
+    },
+    {
+      "id": "musica",
+      "name": "Música",
+      "icon": "🎵",
+      "color": "#EC4899"
+    }
+  ],
+  "questions": [
+    {
+      "id": 1,
+      "category": "cultura-general",
+      "difficulty": "easy",
+      "points": 100,
+      "question": "¿Cuál es la capital de Francia?",
+      "options": ["Londres", "Berlín", "París", "Madrid"],
+      "correctAnswer": 2,
+      "timeLimit": 20
+    },
+    {
+      "id": 2,
+      "category": "cultura-general",
+      "difficulty": "medium",
+      "points": 200,
+      "question": "¿En qué continente se encuentra el desierto del Sahara?",
+      "options": ["Asia", "África", "América", "Oceanía"],
+      "correctAnswer": 1,
+      "timeLimit": 20
+    },
+    {
+      "id": 3,
+      "category": "cultura-general",
+      "difficulty": "hard",
+      "points": 300,
+      "question": "¿Cuál es el río más largo del mundo?",
+      "options": ["Nilo", "Amazonas", "Yangtsé", "Misisipi"],
+      "correctAnswer": 1,
+      "timeLimit": 20
+    },
+    {
+      "id": 4,
+      "category": "ciencia",
+      "difficulty": "easy",
+      "points": 100,
+      "question": "¿Cuántos planetas hay en el sistema solar?",
+      "options": ["7", "8", "9", "10"],
+      "correctAnswer": 1,
+      "timeLimit": 20
+    },
+    {
+      "id": 5,
+      "category": "ciencia",
+      "difficulty": "medium",
+      "points": 200,
+      "question": "¿Qué gas respiran las plantas durante la fotosíntesis?",
+      "options": ["Oxígeno", "Nitrógeno", "Dióxido de carbono", "Hidrógeno"],
+      "correctAnswer": 2,
+      "timeLimit": 20
+    },
+    {
+      "id": 6,
+      "category": "ciencia",
+      "difficulty": "hard",
+      "points": 300,
+      "question": "¿Cuál es el elemento químico más abundante en el universo?",
+      "options": ["Oxígeno", "Carbono", "Helio", "Hidrógeno"],
+      "correctAnswer": 3,
+      "timeLimit": 20
+    },
+    {
+      "id": 7,
+      "category": "biblia",
+      "difficulty": "easy",
+      "points": 100,
+      "question": "¿Quién construyó el arca según el Génesis?",
+      "options": ["Moisés", "Noé", "Abraham", "David"],
+      "correctAnswer": 1,
+      "timeLimit": 20
+    },
+    {
+      "id": 8,
+      "category": "biblia",
+      "difficulty": "medium",
+      "points": 200,
+      "question": "¿Cuántos libros tiene el Nuevo Testamento?",
+      "options": ["27", "39", "66", "73"],
+      "correctAnswer": 0,
+      "timeLimit": 20
+    },
+    {
+      "id": 9,
+      "category": "biblia",
+      "difficulty": "hard",
+      "points": 300,
+      "question": "¿En qué monte recibió Moisés los diez mandamientos?",
+      "options": ["Monte Sinaí", "Monte Carmelo", "Monte Nebo", "Monte Sion"],
+      "correctAnswer": 0,
+      "timeLimit": 20
+    },
+    {
+      "id": 10,
+      "category": "historia",
+      "difficulty": "easy",
+      "points": 100,
+      "question": "¿En qué año llegó Cristóbal Colón a América?",
+      "options": ["1492", "1500", "1488", "1520"],
+      "correctAnswer": 0,
+      "timeLimit": 20
+    },
+    {
+      "id": 11,
+      "category": "historia",
+      "difficulty": "medium",
+      "points": 200,
+      "question": "¿Quién fue el primer emperador romano?",
+      "options": ["Julio César", "Augusto", "Nerón", "Trajano"],
+      "correctAnswer": 1,
+      "timeLimit": 20
+    },
+    {
+      "id": 12,
+      "category": "historia",
+      "difficulty": "hard",
+      "points": 300,
+      "question": "¿En qué año cayó el Muro de Berlín?",
+      "options": ["1987", "1988", "1989", "1990"],
+      "correctAnswer": 2,
+      "timeLimit": 20
+    },
+    {
+      "id": 13,
+      "category": "deportes",
+      "difficulty": "easy",
+      "points": 100,
+      "question": "¿Cuántos jugadores hay en un equipo de fútbol?",
+      "options": ["9", "10", "11", "12"],
+      "correctAnswer": 2,
+      "timeLimit": 20
+    },
+    {
+      "id": 14,
+      "category": "deportes",
+      "difficulty": "medium",
+      "points": 200,
+      "question": "¿En qué país se celebraron los primeros Juegos Olímpicos modernos?",
+      "options": ["Francia", "Grecia", "Inglaterra", "Italia"],
+      "correctAnswer": 1,
+      "timeLimit": 20
+    },
+    {
+      "id": 15,
+      "category": "deportes",
+      "difficulty": "hard",
+      "points": 300,
+      "question": "¿Quién tiene más títulos de Grand Slam en tenis masculino?",
+      "options": ["Roger Federer", "Rafael Nadal", "Novak Djokovic", "Pete Sampras"],
+      "correctAnswer": 2,
+      "timeLimit": 20
+    },
+    {
+      "id": 16,
+      "category": "musica",
+      "difficulty": "easy",
+      "points": 100,
+      "question": "¿Quién es conocido como el 'Rey del Pop'?",
+      "options": ["Elvis Presley", "Michael Jackson", "Prince", "Freddie Mercury"],
+      "correctAnswer": 1,
+      "timeLimit": 20
+    },
+    {
+      "id": 17,
+      "category": "musica",
+      "difficulty": "medium",
+      "points": 200,
+      "question": "¿Cuántas cuerdas tiene una guitarra estándar?",
+      "options": ["4", "5", "6", "7"],
+      "correctAnswer": 2,
+      "timeLimit": 20
+    },
+    {
+      "id": 18,
+      "category": "musica",
+      "difficulty": "hard",
+      "points": 300,
+      "question": "¿Qué banda británica lanzó el álbum 'The Dark Side of the Moon'?",
+      "options": ["The Beatles", "Led Zeppelin", "Pink Floyd", "Queen"],
+      "correctAnswer": 2,
+      "timeLimit": 20
+    }
+  ]
+} 
+

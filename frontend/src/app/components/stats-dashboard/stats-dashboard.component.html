@@ -1,0 +1,245 @@
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-8 flex justify-between items-center">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">📊 Dashboard de Estadísticas</h1>
+        <p class="mt-2 text-sm text-gray-600">
+          Vista general del sistema de trivia - Se actualiza automáticamente cada 30 segundos
+        </p>
+      </div>
+      <button
+        (click)="loadStatistics()"
+        class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+        Actualizar
+      </button>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-center gap-3">
+      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+      </svg>
+      {{ errorMessage }}
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="text-center py-20">
+      <div class="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-purple-600"></div>
+      <p class="mt-6 text-xl text-gray-600 font-medium">Cargando estadísticas...</p>
+    </div>
+
+    <!-- Stats Content -->
+    <div *ngIf="!isLoading && statistics" class="space-y-8 fadeIn">
+      
+      <!-- Overview Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Total Users -->
+        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-transform">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-blue-100 text-sm font-medium mb-1">Total Usuarios</p>
+              <p class="text-4xl font-bold">{{ statistics.overview.totalUsers }}</p>
+              <p class="text-blue-100 text-xs mt-2">+{{ statistics.recentActivity.newUsersThisWeek }} esta semana</p>
+            </div>
+            <div class="bg-blue-400 bg-opacity-30 rounded-full p-4">
+              <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Questions -->
+        <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-transform">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-purple-100 text-sm font-medium mb-1">Total Preguntas</p>
+              <p class="text-4xl font-bold">{{ statistics.overview.totalQuestions }}</p>
+              <p class="text-purple-100 text-xs mt-2">En {{ statistics.charts.questionsByCategory.length }} categorías</p>
+            </div>
+            <div class="bg-purple-400 bg-opacity-30 rounded-full p-4">
+              <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Events -->
+        <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-transform">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-green-100 text-sm font-medium mb-1">Total Eventos</p>
+              <p class="text-4xl font-bold">{{ statistics.overview.totalEvents }}</p>
+              <p class="text-green-100 text-xs mt-2">Organizados</p>
+            </div>
+            <div class="bg-green-400 bg-opacity-30 rounded-full p-4">
+              <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Games -->
+        <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-transform">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-orange-100 text-sm font-medium mb-1">Total Juegos</p>
+              <p class="text-4xl font-bold">{{ statistics.overview.totalGames }}</p>
+              <p class="text-orange-100 text-xs mt-2">+{{ statistics.recentActivity.gamesPlayedThisWeek }} esta semana</p>
+            </div>
+            <div class="bg-orange-400 bg-opacity-30 rounded-full p-4">
+              <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Games -->
+        <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-transform">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-red-100 text-sm font-medium mb-1">Juegos Activos</p>
+              <p class="text-4xl font-bold">{{ statistics.overview.activeGames }}</p>
+              <p class="text-red-100 text-xs mt-2">En progreso ahora</p>
+            </div>
+            <div class="bg-red-400 bg-opacity-30 rounded-full p-4">
+              <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Teams -->
+        <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-transform">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-indigo-100 text-sm font-medium mb-1">Total Equipos</p>
+              <p class="text-4xl font-bold">{{ statistics.overview.totalTeams }}</p>
+              <p class="text-indigo-100 text-xs mt-2">Registrados</p>
+            </div>
+            <div class="bg-indigo-400 bg-opacity-30 rounded-full p-4">
+              <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Section -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Questions by Difficulty -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            Preguntas por Dificultad
+          </h3>
+          <div class="space-y-4">
+            <div *ngFor="let item of statistics.charts.questionsByDifficulty" class="flex items-center gap-4">
+              <div class="w-20 text-sm font-medium text-gray-700 capitalize">{{ item.difficulty }}</div>
+              <div class="flex-1 bg-gray-200 rounded-full h-8 relative overflow-hidden">
+                <div 
+                  class="h-full rounded-full transition-all duration-500 flex items-center justify-end pr-3"
+                  [style.width.%]="(item.count / statistics.overview.totalQuestions) * 100"
+                  [style.background-color]="getDifficultyColor(item.difficulty)"
+                >
+                  <span class="text-white font-bold text-sm">{{ item.count }}</span>
+                </div>
+              </div>
+              <div class="w-16 text-right text-sm text-gray-600">
+                {{ ((item.count / statistics.overview.totalQuestions) * 100).toFixed(1) }}%
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Questions by Category -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>
+            </svg>
+            Top 5 Categorías
+          </h3>
+          <div class="space-y-3">
+            <div *ngFor="let item of statistics.charts.questionsByCategory; let i = index" 
+                 class="flex items-center gap-4 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+              <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                {{ i + 1 }}
+              </div>
+              <div class="flex-1">
+                <div class="font-medium text-gray-800">{{ item.category }}</div>
+                <div class="text-xs text-gray-500">{{ item.count }} preguntas</div>
+              </div>
+              <div class="text-2xl font-bold text-purple-600">{{ item.count }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Games Activity -->
+      <div class="bg-white rounded-xl shadow-lg p-6">
+        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+          </svg>
+          Actividad Reciente (Últimos 10 Juegos)
+        </h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Juego</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Evento</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modo</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Creado</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr *ngFor="let game of statistics.games" class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="font-medium text-gray-900">{{ game.name }}</div>
+                  <div class="text-xs text-gray-500">{{ game.id.substring(0, 8) }}...</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span *ngIf="game.event" class="text-sm text-gray-700">{{ game.event.name }}</span>
+                  <span *ngIf="!game.event" class="text-sm text-gray-400 italic">Sin evento</span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span [class]="'px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ' + getModeBadgeClass(game.mode)">
+                    {{ getModeLabel(game.mode) }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span [class]="'px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ' + getStatusBadgeClass(game.status)">
+                    {{ getStatusLabel(game.status) }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {{ formatDate(game.createdAt) }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div *ngIf="statistics.games.length === 0" class="text-center py-8 text-gray-500">
+            No hay juegos recientes
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

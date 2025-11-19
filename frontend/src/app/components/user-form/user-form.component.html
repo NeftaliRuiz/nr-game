@@ -1,0 +1,149 @@
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">
+        {{ isEditMode ? 'Edit User' : 'Create New User' }}
+      </h1>
+      <p class="mt-2 text-sm text-gray-600">
+        {{ isEditMode ? 'Update user information and permissions' : 'Add a new user to the system' }}
+      </p>
+    </div>
+
+    <!-- Success Message -->
+    <div *ngIf="successMessage" class="mb-6 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg flex items-center">
+      <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+      </svg>
+      {{ successMessage }}
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-center">
+      <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+      </svg>
+      {{ errorMessage }}
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="p-6 space-y-6">
+        
+        <!-- Email Field -->
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+            Email Address <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="email"
+            id="email"
+            formControlName="email"
+            [class.border-red-500]="isFieldInvalid('email')"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+            placeholder="user&#64;example.com"
+          />
+          <p *ngIf="isFieldInvalid('email')" class="mt-1 text-sm text-red-600">
+            {{ getFieldError('email') }}
+          </p>
+        </div>
+
+        <!-- Name Field -->
+        <div>
+          <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+            Full Name <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            id="name"
+            formControlName="name"
+            [class.border-red-500]="isFieldInvalid('name')"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+            placeholder="John Doe"
+          />
+          <p *ngIf="isFieldInvalid('name')" class="mt-1 text-sm text-red-600">
+            {{ getFieldError('name') }}
+          </p>
+        </div>
+
+        <!-- Password Field -->
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+            Password 
+            <span *ngIf="!isEditMode" class="text-red-500">*</span>
+            <span *ngIf="isEditMode" class="text-gray-500 text-xs ml-2">(Leave blank to keep current password)</span>
+          </label>
+          <input
+            type="password"
+            id="password"
+            formControlName="password"
+            [class.border-red-500]="isFieldInvalid('password')"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+            placeholder="••••••••"
+          />
+          <p *ngIf="isFieldInvalid('password')" class="mt-1 text-sm text-red-600">
+            {{ getFieldError('password') }}
+          </p>
+          <p *ngIf="!isFieldInvalid('password')" class="mt-1 text-xs text-gray-500">
+            Minimum 6 characters
+          </p>
+        </div>
+
+        <!-- Role Field -->
+        <div>
+          <label for="role" class="block text-sm font-medium text-gray-700 mb-2">
+            Role <span class="text-red-500">*</span>
+          </label>
+          <select
+            id="role"
+            formControlName="role"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+          >
+            <option *ngFor="let role of roles" [value]="role.value">
+              {{ role.label }}
+            </option>
+          </select>
+          <p class="mt-1 text-xs text-gray-500">
+            Administrators have full access to all system features
+          </p>
+        </div>
+
+        <!-- Active Status Toggle -->
+        <div class="flex items-center">
+          <input
+            type="checkbox"
+            id="isActive"
+            formControlName="isActive"
+            class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+          />
+          <label for="isActive" class="ml-2 block text-sm text-gray-700">
+            Active User
+          </label>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+          <button
+            type="button"
+            (click)="cancel()"
+            [disabled]="isLoading"
+            class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            [disabled]="isLoading || userForm.invalid"
+            class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+          >
+            <svg *ngIf="isLoading" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            {{ isEditMode ? 'Update User' : 'Create User' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

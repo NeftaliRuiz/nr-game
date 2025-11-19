@@ -1,0 +1,322 @@
+<div class="container mx-auto p-8">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-4xl font-bold text-gray-800 mb-2">❓ Preguntas por Evento</h1>
+      <p class="text-gray-600">Crea y administra preguntas específicas para cada evento, modo de juego y ronda</p>
+    </div>
+    <button 
+      (click)="openCreateForm()"
+      [disabled]="!selectedEventId"
+      class="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-700 hover:to-green-800 transition-all shadow-lg hover:shadow-xl flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+      </svg>
+      Nueva Pregunta
+    </button>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="successMessage" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded-lg shadow-md">
+    ✅ {{ successMessage }}
+  </div>
+
+  <div *ngIf="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg shadow-md">
+    ❌ {{ errorMessage }}
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Event Filter -->
+      <div>
+        <label class="block text-sm font-bold text-gray-700 mb-2">📅 Evento *</label>
+        <select
+          [(ngModel)]="selectedEventId"
+          (change)="onFilterChange()"
+          class="w-full"
+        >
+          <option value="">Todos los eventos</option>
+          <option *ngFor="let event of events" [value]="event.id">{{ event.name }}</option>
+        </select>
+      </div>
+
+      <!-- Game Mode Filter -->
+      <div>
+        <label class="block text-sm font-bold text-gray-700 mb-2">🎮 Modo de Juego</label>
+        <select
+          [(ngModel)]="selectedGameMode"
+          (change)="onFilterChange()"
+          class="w-full"
+        >
+          <option value="">Todos los modos</option>
+          <option value="KAHOOT">🎯 Kahoot (Equipos)</option>
+          <option value="GEOPARTY">🌎 Geoparty (Individual)</option>
+        </select>
+      </div>
+
+      <!-- Round Filter -->
+      <div>
+        <label class="block text-sm font-bold text-gray-700 mb-2">🔢 Ronda</label>
+        <select
+          [(ngModel)]="selectedRound"
+          (change)="onFilterChange()"
+          class="w-full"
+        >
+          <option [ngValue]="null">Todas las rondas</option>
+          <option *ngFor="let round of getAvailableRounds()" [ngValue]="round">Ronda {{ round }}</option>
+        </select>
+      </div>
+
+      <!-- Search -->
+      <div>
+        <label class="block text-sm font-bold text-gray-700 mb-2">🔍 Buscar</label>
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          (input)="onSearchChange()"
+          placeholder="Buscar pregunta..."
+          class="w-full"
+        />
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div *ngIf="!selectedEventId" class="mt-4 p-4 bg-blue-50 border-l-4 border-blue-500 text-blue-700 rounded">
+      💡 <strong>Tip:</strong> Selecciona un evento para crear preguntas específicas para ese evento.
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex justify-center items-center py-20">
+    <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-green-600"></div>
+  </div>
+
+  <!-- Questions List -->
+  <div *ngIf="!loading && filteredQuestions.length > 0" class="space-y-4">
+    <div *ngFor="let question of filteredQuestions" class="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all">
+      <div class="flex justify-between items-start mb-4">
+        <div class="flex-1">
+          <div class="flex items-center gap-2 mb-3">
+            <span [class]="'px-3 py-1 rounded-full text-xs font-bold ' + getGameModeColor(question.gameMode)">
+              {{ getGameModeIcon(question.gameMode) }} {{ question.gameMode }}
+            </span>
+            <span [class]="'px-3 py-1 rounded-full text-xs font-bold ' + getDifficultyColor(question.difficulty)">
+              {{ getDifficultyLabel(question.difficulty) }}
+            </span>
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
+              Ronda {{ question.round }}
+            </span>
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-800">
+              {{ question.category }}
+            </span>
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800">
+              {{ question.points }} pts
+            </span>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2">{{ question.question }}</h3>
+          <p class="text-sm text-gray-600 mb-3">📅 {{ getEventName(question.eventId) }} • ⏱️ {{ question.timeLimit }}s</p>
+          
+          <!-- Options -->
+          <div class="grid grid-cols-2 gap-2">
+            <div *ngFor="let option of question.options; let i = index" [class]="'p-3 rounded-lg border-2 ' + (i === question.correctAnswer ? 'bg-green-50 border-green-500' : 'bg-gray-50 border-gray-200')">
+              <div class="flex items-center gap-2">
+                <span [class]="'w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ' + (i === question.correctAnswer ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-700')">
+                  {{ i + 1 }}
+                </span>
+                <span class="text-sm text-gray-800 font-medium">{{ option }}</span>
+                <span *ngIf="i === question.correctAnswer" class="ml-auto text-green-600 font-bold">✓ Correcta</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-2 ml-4">
+          <button
+            (click)="openEditForm(question)"
+            class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all font-semibold text-sm"
+          >
+            ✏️ Editar
+          </button>
+          <button
+            (click)="deleteQuestion(question)"
+            class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-all font-semibold text-sm"
+          >
+            🗑️ Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && filteredQuestions.length === 0" class="text-center py-20">
+    <div class="text-gray-400 mb-4">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    </div>
+    <h3 class="text-2xl font-bold text-gray-600 mb-2">No hay preguntas</h3>
+    <p class="text-gray-500">{{ selectedEventId ? 'Crea tu primera pregunta para este evento' : 'Selecciona un evento para ver sus preguntas' }}</p>
+  </div>
+</div>
+
+<!-- Create/Edit Modal -->
+<div *ngIf="showForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full my-8">
+    <!-- Modal Header -->
+    <div class="bg-gradient-to-r from-green-600 to-teal-600 p-6 text-white rounded-t-2xl">
+      <h2 class="text-3xl font-bold">{{ isEditing ? '✏️ Editar Pregunta' : '✨ Crear Nueva Pregunta' }}</h2>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="p-8 max-h-[70vh] overflow-y-auto">
+      <!-- Event and Game Mode -->
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">📅 Evento *</label>
+          <select [(ngModel)]="questionEventId" class="w-full">
+            <option value="">Selecciona un evento</option>
+            <option *ngFor="let event of events" [value]="event.id">{{ event.name }}</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">🎮 Modo de Juego *</label>
+          <select [(ngModel)]="questionGameMode" class="w-full">
+            <option value="">Selecciona modo</option>
+            <option value="KAHOOT">🎯 Kahoot (Equipos)</option>
+            <option value="GEOPARTY">🌎 Geoparty (Individual)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Question Text -->
+      <div class="mb-6">
+        <label class="block text-sm font-bold text-gray-700 mb-2">❓ Pregunta *</label>
+        <textarea
+          [(ngModel)]="questionText"
+          placeholder="Escribe la pregunta aquí..."
+          class="w-full"
+          rows="3"
+        ></textarea>
+      </div>
+
+      <!-- Category, Difficulty, Round -->
+      <div class="grid grid-cols-3 gap-4 mb-6">
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">📂 Categoría *</label>
+          <select [(ngModel)]="questionCategory" class="w-full">
+            <option value="">Selecciona</option>
+            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">⭐ Dificultad *</label>
+          <select [(ngModel)]="questionDifficulty" class="w-full">
+            <option value="easy">Fácil</option>
+            <option value="medium">Media</option>
+            <option value="hard">Difícil</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">🔢 Ronda *</label>
+          <select [(ngModel)]="questionRound" class="w-full">
+            <option *ngFor="let round of getAvailableRounds()" [ngValue]="round">Ronda {{ round }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Points and Time -->
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">💰 Puntos *</label>
+          <input
+            type="number"
+            [(ngModel)]="questionPoints"
+            min="50"
+            max="500"
+            step="50"
+            class="w-full"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">⏱️ Tiempo Límite (segundos) *</label>
+          <input
+            type="number"
+            [(ngModel)]="questionTimeLimit"
+            min="10"
+            max="120"
+            step="5"
+            class="w-full"
+          />
+        </div>
+      </div>
+
+      <!-- Options -->
+      <div class="mb-6">
+        <div class="flex justify-between items-center mb-3">
+          <label class="block text-sm font-bold text-gray-700">📝 Opciones de Respuesta *</label>
+          <button
+            *ngIf="questionOptions.length < 6"
+            (click)="addOption()"
+            class="text-sm bg-gray-200 px-3 py-1 rounded hover:bg-gray-300 font-semibold"
+          >
+            ➕ Agregar Opción
+          </button>
+        </div>
+
+        <div *ngFor="let option of questionOptions; let i = index" class="flex items-center gap-2 mb-3">
+          <input
+            type="radio"
+            name="correctAnswer"
+            [checked]="questionCorrectAnswer === i"
+            (change)="questionCorrectAnswer = i"
+            class="w-5 h-5"
+          />
+          <!-- Option Letter (A, B, C, D) -->
+          <span class="w-8 h-8 rounded-full bg-blue-500 text-white font-bold flex items-center justify-center text-lg">
+            {{ getOptionLetter(i) }}
+          </span>
+          <input
+            type="text"
+            [(ngModel)]="questionOptions[i]"
+            [placeholder]="'Opción ' + getOptionLetter(i)"
+            class="flex-1"
+          />
+          <button
+            *ngIf="questionOptions.length > 2"
+            (click)="removeOption(i)"
+            class="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 font-semibold text-sm"
+          >
+            ❌
+          </button>
+        </div>
+        <p class="text-sm text-gray-500 mt-2">💡 Selecciona el radio button de la respuesta correcta</p>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex gap-4 pt-4 border-t">
+        <button
+          (click)="saveQuestion()"
+          [disabled]="loading"
+          class="flex-1 bg-gradient-to-r from-green-600 to-teal-600 text-white px-6 py-4 rounded-lg font-bold text-lg hover:from-green-700 hover:to-teal-700 transition-all shadow-lg disabled:opacity-50"
+        >
+          {{ loading ? 'Guardando...' : (isEditing ? '💾 Guardar Cambios' : '✨ Crear Pregunta') }}
+        </button>
+        <button
+          (click)="closeForm()"
+          [disabled]="loading"
+          class="px-6 py-4 bg-gray-300 text-gray-700 rounded-lg font-bold text-lg hover:bg-gray-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          ❌ Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

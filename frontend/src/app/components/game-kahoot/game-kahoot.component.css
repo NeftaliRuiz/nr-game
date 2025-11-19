@@ -1,0 +1,94 @@
+.option-btn {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+}
+
+.option-btn:hover:not(.cursor-not-allowed) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.option-btn:active:not(.cursor-not-allowed) {
+  transform: translateY(0);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Timer circle animation */
+circle {
+  transition: stroke-dashoffset 1s linear, stroke 0.3s ease;
+}
+
+/* Leaderboard entry animation */
+.leaderboard-entry {
+  animation: fadeIn 0.3s ease-out backwards;
+}
+
+.leaderboard-entry:nth-child(1) { animation-delay: 0.1s; }
+.leaderboard-entry:nth-child(2) { animation-delay: 0.2s; }
+.leaderboard-entry:nth-child(3) { animation-delay: 0.3s; }
+.leaderboard-entry:nth-child(4) { animation-delay: 0.4s; }
+.leaderboard-entry:nth-child(5) { animation-delay: 0.5s; }
+
+/* Podium animation */
+@keyframes slideUp {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.podium-item {
+  animation: slideUp 0.6s ease-out backwards;
+}
+
+.podium-item:nth-child(1) { animation-delay: 0.2s; }
+.podium-item:nth-child(2) { animation-delay: 0s; }
+.podium-item:nth-child(3) { animation-delay: 0.4s; }

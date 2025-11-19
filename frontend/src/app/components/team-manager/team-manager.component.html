@@ -1,0 +1,255 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+      <div class="flex justify-between items-center">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-800">👥 Gestión de Equipos</h1>
+          <p class="text-gray-600 mt-2">Crea y administra equipos para tus eventos</p>
+        </div>
+        <button
+          (click)="openCreateForm()"
+          class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-lg hover:shadow-xl transition-all font-bold flex items-center gap-2"
+        >
+          <span class="text-xl">➕</span>
+          Crear Equipo
+        </button>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div *ngIf="successMessage" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">
+      ✅ {{ successMessage }}
+    </div>
+    <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
+      ❌ {{ errorMessage }}
+    </div>
+
+    <!-- Filter -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+      <label class="block text-sm font-medium text-gray-700 mb-2">
+        🎯 Filtrar por Evento
+      </label>
+      <select
+        [(ngModel)]="selectedEventId"
+        (change)="onEventFilterChange()"
+        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      >
+        <option value="">Todos los eventos</option>
+        <option *ngFor="let event of events" [value]="event.id">
+          {{ event.name }} ({{ event.status }})
+        </option>
+      </select>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="text-center py-12">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+      <p class="mt-4 text-gray-600">Cargando equipos...</p>
+    </div>
+
+    <!-- Teams Grid -->
+    <div *ngIf="!isLoading && filteredTeams.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div *ngFor="let team of filteredTeams" class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-shadow overflow-hidden">
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <span class="text-4xl">{{ team.icon }}</span>
+              <div>
+                <h3 class="text-xl font-bold text-gray-800">{{ team.name }}</h3>
+                <p class="text-sm text-gray-500">{{ getEventName(team.eventId) }}</p>
+              </div>
+            </div>
+            <div 
+              class="w-8 h-8 rounded-full border-2 border-gray-300" 
+              [style.backgroundColor]="team.color"
+            ></div>
+          </div>
+
+          <div class="flex gap-2 mt-4">
+            <button
+              (click)="openEditForm(team)"
+              class="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors text-sm font-bold"
+            >
+              ✏️ Editar
+            </button>
+            <button
+              (click)="deleteTeam(team.id)"
+              class="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors text-sm font-bold"
+            >
+              🗑️ Eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Teams -->
+    <div *ngIf="!isLoading && filteredTeams.length === 0" class="bg-white rounded-xl shadow-lg p-12 text-center">
+      <span class="text-6xl mb-4 block">📭</span>
+      <h3 class="text-2xl font-bold text-gray-800 mb-2">No hay equipos</h3>
+      <p class="text-gray-600 mb-6">
+        {{ selectedEventId ? 'No hay equipos para este evento' : 'Crea tu primer equipo para comenzar' }}
+      </p>
+      <button
+        (click)="openCreateForm()"
+        class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-bold"
+      >
+        ➕ Crear Primer Equipo
+      </button>
+    </div>
+  </div>
+
+  <!-- Create Team Modal -->
+  <div *ngIf="showCreateForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">➕ Crear Nuevo Equipo</h2>
+      
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del Equipo</label>
+          <input
+            type="text"
+            [(ngModel)]="newTeam.name"
+            placeholder="Equipo Rojo"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Icono</label>
+          <div class="grid grid-cols-7 gap-2">
+            <button
+              *ngFor="let icon of availableIcons"
+              (click)="newTeam.icon = icon"
+              [class.ring-4]="newTeam.icon === icon"
+              [class.ring-blue-500]="newTeam.icon === icon"
+              class="text-2xl p-2 hover:bg-gray-100 rounded-lg transition-all"
+            >
+              {{ icon }}
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Color</label>
+          <div class="grid grid-cols-6 gap-2">
+            <button
+              *ngFor="let color of availableColors"
+              (click)="newTeam.color = color"
+              [class.ring-4]="newTeam.color === color"
+              [class.ring-blue-500]="newTeam.color === color"
+              class="w-10 h-10 rounded-lg border-2 border-gray-300 hover:scale-110 transition-transform"
+              [style.backgroundColor]="color"
+            ></button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Evento (opcional)</label>
+          <select
+            [(ngModel)]="newTeam.eventId"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="">Sin evento</option>
+            <option *ngFor="let event of events" [value]="event.id">
+              {{ event.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex gap-3 mt-6">
+        <button
+          (click)="closeCreateForm()"
+          class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-3 rounded-lg font-bold transition-colors"
+        >
+          Cancelar
+        </button>
+        <button
+          (click)="createTeam()"
+          [disabled]="isLoading"
+          class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 hover:shadow-xl text-white px-4 py-3 rounded-lg font-bold transition-all disabled:opacity-50"
+        >
+          {{ isLoading ? 'Creando...' : 'Crear Equipo' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Team Modal -->
+  <div *ngIf="showEditForm && editingTeam" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">✏️ Editar Equipo</h2>
+      
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del Equipo</label>
+          <input
+            type="text"
+            [(ngModel)]="editingTeam.name"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Icono</label>
+          <div class="grid grid-cols-7 gap-2">
+            <button
+              *ngFor="let icon of availableIcons"
+              (click)="editingTeam.icon = icon"
+              [class.ring-4]="editingTeam.icon === icon"
+              [class.ring-blue-500]="editingTeam.icon === icon"
+              class="text-2xl p-2 hover:bg-gray-100 rounded-lg transition-all"
+            >
+              {{ icon }}
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Color</label>
+          <div class="grid grid-cols-6 gap-2">
+            <button
+              *ngFor="let color of availableColors"
+              (click)="editingTeam.color = color"
+              [class.ring-4]="editingTeam.color === color"
+              [class.ring-blue-500]="editingTeam.color === color"
+              class="w-10 h-10 rounded-lg border-2 border-gray-300 hover:scale-110 transition-transform"
+              [style.backgroundColor]="color"
+            ></button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Evento</label>
+          <select
+            [(ngModel)]="editingTeam.eventId"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="">Sin evento</option>
+            <option *ngFor="let event of events" [value]="event.id">
+              {{ event.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex gap-3 mt-6">
+        <button
+          (click)="closeEditForm()"
+          class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-3 rounded-lg font-bold transition-colors"
+        >
+          Cancelar
+        </button>
+        <button
+          (click)="updateTeam()"
+          [disabled]="isLoading"
+          class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 hover:shadow-xl text-white px-4 py-3 rounded-lg font-bold transition-all disabled:opacity-50"
+        >
+          {{ isLoading ? 'Guardando...' : 'Guardar Cambios' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

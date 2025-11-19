@@ -1,0 +1,256 @@
+<div class="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-4xl font-bold text-gray-800 mb-2">📊 Monitor de Juegos en Tiempo Real</h1>
+          <p class="text-gray-600">Visualiza todos los juegos activos y sus estadísticas</p>
+        </div>
+        
+        <!-- Auto-refresh Toggle -->
+        <div class="flex items-center space-x-4">
+          <button 
+            (click)="loadActiveGames()"
+            class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors flex items-center space-x-2"
+          >
+            <span>🔄</span>
+            <span>Actualizar</span>
+          </button>
+          
+          <button 
+            (click)="toggleAutoRefresh()"
+            [class]="autoRefresh ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-500 hover:bg-gray-600'"
+            class="text-white px-6 py-3 rounded-lg transition-colors flex items-center space-x-2"
+          >
+            <span>{{ autoRefresh ? '✓' : '✗' }}</span>
+            <span>Auto-refresh (3s)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Games Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6" *ngIf="activeGames.length > 0">
+      <div 
+        *ngFor="let game of activeGames"
+        class="bg-white rounded-xl shadow-lg p-6 cursor-pointer transition-all hover:scale-105 hover:shadow-2xl"
+        (click)="selectGame(game.gameId, game.mode)"
+      >
+        <!-- Game Header -->
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center space-x-3">
+            <div class="text-4xl">{{ getModeIcon(game.mode) }}</div>
+            <div>
+              <div class="font-bold text-xl text-gray-800">{{ game.mode }}</div>
+              <div class="text-sm text-gray-500 font-mono">{{ formatGameCode(game.gameId) }}</div>
+            </div>
+          </div>
+          
+          <!-- Live Indicator -->
+          <div class="flex items-center space-x-2">
+            <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+            <span class="text-sm font-semibold text-green-600">EN VIVO</span>
+          </div>
+        </div>
+
+        <!-- Game Stats -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between bg-gray-50 rounded-lg p-3">
+            <span class="text-gray-600">👥 Participantes</span>
+            <span class="font-bold text-xl text-blue-600">{{ game.participants }}</span>
+          </div>
+          
+          <div class="flex items-center justify-between bg-gray-50 rounded-lg p-3">
+            <span class="text-gray-600">❓ Pregunta Activa</span>
+            <span class="font-semibold" [class]="game.hasCurrentQuestion ? 'text-green-600' : 'text-gray-400'">
+              {{ game.hasCurrentQuestion ? 'Sí' : 'No' }}
+            </span>
+          </div>
+          
+          <div class="flex items-center justify-between bg-gray-50 rounded-lg p-3">
+            <span class="text-gray-600">⏱️ Timer Activo</span>
+            <span class="font-semibold" [class]="game.hasActiveTimer ? 'text-orange-600' : 'text-gray-400'">
+              {{ game.hasActiveTimer ? 'Corriendo' : 'Parado' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- View Details Button -->
+        <button 
+          class="w-full mt-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 rounded-lg hover:shadow-xl transition-all"
+        >
+          Ver Detalles →
+        </button>
+      </div>
+    </div>
+
+    <!-- No Active Games -->
+    <div class="bg-white rounded-xl shadow-lg p-12 text-center" *ngIf="activeGames.length === 0">
+      <div class="text-6xl mb-4">🎮</div>
+      <h2 class="text-2xl font-bold text-gray-800 mb-2">No hay juegos activos</h2>
+      <p class="text-gray-600 mb-6">Crea un nuevo juego para comenzar</p>
+      <a 
+        routerLink="/admin/game-creator"
+        class="inline-block bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-4 px-8 rounded-lg hover:shadow-xl transition-all"
+      >
+        ➕ Crear Juego
+      </a>
+    </div>
+
+    <!-- Game Details Modal -->
+    <div 
+      class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-6"
+      *ngIf="selectedGame"
+      (click)="closeGameDetails()"
+    >
+      <div 
+        class="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto"
+        (click)="$event.stopPropagation()"
+      >
+        <!-- Modal Header -->
+        <div [class]="'bg-gradient-to-r ' + getModeColor(selectedGame.mode) + ' text-white p-6 rounded-t-2xl'">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+              <div class="text-5xl">{{ getModeIcon(selectedGame.mode) }}</div>
+              <div>
+                <h2 class="text-3xl font-bold">{{ selectedGame.name }}</h2>
+                <p class="text-lg opacity-90">Código: {{ formatGameCode(selectedGame.id) }}</p>
+              </div>
+            </div>
+            
+            <button 
+              (click)="closeGameDetails()"
+              class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-lg px-4 py-2 transition-colors"
+            >
+              ✕ Cerrar
+            </button>
+          </div>
+        </div>
+
+        <!-- Modal Content -->
+        <div class="p-6">
+          <!-- Game Stats -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-gray-50 rounded-lg p-4 text-center">
+              <div class="text-3xl mb-2">📊</div>
+              <div class="text-sm text-gray-600">Estado</div>
+              <div [class]="'inline-block px-3 py-1 rounded-full text-white text-sm font-semibold mt-2 ' + getStatusBadgeClass(selectedGame.status)">
+                {{ getStatusText(selectedGame.status) }}
+              </div>
+            </div>
+
+            <div class="bg-gray-50 rounded-lg p-4 text-center">
+              <div class="text-3xl mb-2">👥</div>
+              <div class="text-sm text-gray-600">Participantes</div>
+              <div class="text-2xl font-bold text-blue-600">{{ selectedGame.participants }}</div>
+            </div>
+
+            <div class="bg-gray-50 rounded-lg p-4 text-center">
+              <div class="text-3xl mb-2">✓</div>
+              <div class="text-sm text-gray-600">Completadas</div>
+              <div class="text-2xl font-bold text-green-600">{{ selectedGame.questionsAnswered }}</div>
+            </div>
+
+            <div class="bg-gray-50 rounded-lg p-4 text-center">
+              <div class="text-3xl mb-2">🔢</div>
+              <div class="text-sm text-gray-600">Total</div>
+              <div class="text-2xl font-bold text-purple-600">{{ selectedGame.totalQuestions }}</div>
+            </div>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="mb-6">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-semibold text-gray-700">Progreso del Juego</span>
+              <span class="text-sm font-semibold text-gray-700">{{ getProgressPercentage(selectedGame).toFixed(0) }}%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-4">
+              <div 
+                [class]="'bg-gradient-to-r ' + getModeColor(selectedGame.mode) + ' h-4 rounded-full transition-all duration-500'"
+                [style.width.%]="getProgressPercentage(selectedGame)"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Two Columns: Participants & Leaderboard -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Participants List -->
+            <div>
+              <h3 class="text-xl font-bold text-gray-800 mb-4">👥 Participantes</h3>
+              <div class="space-y-2 max-h-96 overflow-y-auto">
+                <div 
+                  *ngFor="let participant of selectedGame.participantsList"
+                  class="bg-gray-50 rounded-lg p-4 flex items-center justify-between"
+                >
+                  <div class="flex items-center space-x-3">
+                    <div class="text-2xl">👤</div>
+                    <div>
+                      <div class="font-semibold text-gray-800">{{ participant.userName }}</div>
+                      <div class="text-sm text-gray-500" *ngIf="participant.teamName">
+                        Equipo: {{ participant.teamName }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <div class="text-xl font-bold text-blue-600">{{ participant.score || 0 }}</div>
+                    <div class="text-xs text-gray-500">puntos</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Leaderboard -->
+            <div>
+              <h3 class="text-xl font-bold text-gray-800 mb-4">🏆 Clasificación</h3>
+              <div class="space-y-2 max-h-96 overflow-y-auto">
+                <div 
+                  *ngFor="let entry of selectedGame.leaderboard"
+                  class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-4"
+                  [class.border-2]="entry.rank <= 3"
+                  [class.border-yellow-400]="entry.rank === 1"
+                  [class.border-gray-400]="entry.rank === 2"
+                  [class.border-orange-400]="entry.rank === 3"
+                >
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                      <span class="text-2xl font-bold">{{ getRankMedal(entry.rank) }}</span>
+                      <div>
+                        <div class="font-semibold text-gray-800">{{ entry.userName }}</div>
+                        <div class="text-sm text-gray-500" *ngIf="entry.teamName">
+                          {{ entry.teamName }}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="text-right">
+                      <div class="text-2xl font-bold text-blue-600">{{ entry.score }}</div>
+                      <div class="text-xs text-gray-500">
+                        {{ entry.correctAnswers }} correctas
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Streak -->
+                  <div *ngIf="entry.streak > 0" class="mt-2 text-xs text-orange-600 font-semibold">
+                    🔥 Racha: {{ entry.streak }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Refresh Button -->
+          <div class="mt-6 text-center">
+            <button 
+              (click)="refreshGameDetails()"
+              [disabled]="isLoading"
+              class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-lg transition-colors disabled:opacity-50"
+            >
+              {{ isLoading ? '⏳ Actualizando...' : '🔄 Actualizar Datos' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

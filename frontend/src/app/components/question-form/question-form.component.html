@@ -1,0 +1,178 @@
+<div class="container mx-auto max-w-4xl">
+  <!-- Header -->
+  <div class="mb-6">
+    <button (click)="cancel()" class="text-blue-600 hover:text-blue-800 flex items-center mb-4">
+      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+      Volver a Preguntas
+    </button>
+    <h1 class="text-3xl font-bold text-gray-800">
+      {{ isEditMode ? 'Editar Pregunta' : 'Crear Nueva Pregunta' }}
+    </h1>
+  </div>
+
+  <!-- Success Message -->
+  <div *ngIf="success" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4 flex items-center">
+    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+    </svg>
+    {{ success }}
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+    {{ error }}
+  </div>
+
+  <!-- Form -->
+  <form [formGroup]="questionForm" (ngSubmit)="onSubmit()" class="bg-white rounded-lg shadow p-6 space-y-6">
+    
+    <!-- Category and Difficulty -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Category -->
+      <div>
+        <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Categoría *</label>
+        <select
+          id="category"
+          formControlName="category"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          [class.border-red-500]="submitted && f['category'].errors"
+        >
+          <option value="">Selecciona una categoría</option>
+          <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+        </select>
+        <div *ngIf="submitted && f['category'].errors" class="text-red-500 text-xs mt-1">
+          La categoría es requerida
+        </div>
+      </div>
+
+      <!-- Difficulty -->
+      <div>
+        <label for="difficulty" class="block text-sm font-medium text-gray-700 mb-2">Dificultad *</label>
+        <select
+          id="difficulty"
+          formControlName="difficulty"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          [class.border-red-500]="submitted && f['difficulty'].errors"
+        >
+          <option value="">Selecciona dificultad</option>
+          <option *ngFor="let diff of difficulties" [value]="diff.value">
+            {{ diff.label }} ({{ diff.points }} pts)
+          </option>
+        </select>
+        <div *ngIf="submitted && f['difficulty'].errors" class="text-red-500 text-xs mt-1">
+          La dificultad es requerida
+        </div>
+      </div>
+    </div>
+
+    <!-- Question Text -->
+    <div>
+      <label for="question" class="block text-sm font-medium text-gray-700 mb-2">Pregunta *</label>
+      <textarea
+        id="question"
+        formControlName="question"
+        rows="3"
+        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        [class.border-red-500]="submitted && f['question'].errors"
+        placeholder="Escribe tu pregunta de trivia aquí..."
+      ></textarea>
+      <div *ngIf="submitted && f['question'].errors" class="text-red-500 text-xs mt-1">
+        <span *ngIf="f['question'].errors['required']">La pregunta es requerida</span>
+        <span *ngIf="f['question'].errors['minlength']">La pregunta debe tener al menos 10 caracteres</span>
+      </div>
+    </div>
+
+    <!-- Answer Options -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">Opciones de Respuesta *</label>
+      <div formArrayName="options" class="space-y-3">
+        <div *ngFor="let option of options.controls; let i = index" [formGroupName]="i" class="flex items-center space-x-3">
+          <div class="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center font-semibold text-blue-600">
+            {{ i + 1 }}
+          </div>
+          <input
+            type="text"
+            formControlName="value"
+            class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [class.border-red-500]="submitted && option.get('value')?.errors"
+            [placeholder]="'Opción ' + (i + 1)"
+          />
+          <div
+            [class.bg-green-500]="f['correctAnswer'].value === i"
+            [class.bg-gray-300]="f['correctAnswer'].value !== i"
+            class="w-6 h-6 rounded-full flex items-center justify-center cursor-pointer transition-colors"
+            (click)="questionForm.patchValue({ correctAnswer: i })"
+            title="Marcar como respuesta correcta"
+          >
+            <svg *ngIf="f['correctAnswer'].value === i" class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-gray-500 mt-2">Haz clic en el círculo para marcar la respuesta correcta</p>
+    </div>
+
+    <!-- Points and Time Limit -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Points -->
+      <div>
+        <label for="points" class="block text-sm font-medium text-gray-700 mb-2">Puntos *</label>
+        <input
+          type="number"
+          id="points"
+          formControlName="points"
+          min="50"
+          max="500"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          [class.border-red-500]="submitted && f['points'].errors"
+        />
+        <div *ngIf="submitted && f['points'].errors" class="text-red-500 text-xs mt-1">
+          Los puntos deben estar entre 50 y 500
+        </div>
+      </div>
+
+      <!-- Time Limit -->
+      <div>
+        <label for="timeLimit" class="block text-sm font-medium text-gray-700 mb-2">Tiempo Límite (segundos) *</label>
+        <input
+          type="number"
+          id="timeLimit"
+          formControlName="timeLimit"
+          min="10"
+          max="120"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          [class.border-red-500]="submitted && f['timeLimit'].errors"
+        />
+        <div *ngIf="submitted && f['timeLimit'].errors" class="text-red-500 text-xs mt-1">
+          El tiempo límite debe estar entre 10 y 120 segundos
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="flex justify-end space-x-4 pt-4 border-t">
+      <button
+        type="button"
+        (click)="cancel()"
+        class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+        [disabled]="loading"
+      >
+        Cancelar
+      </button>
+      <button
+        type="submit"
+        class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+        [disabled]="loading"
+      >
+        <svg *ngIf="loading" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        {{ loading ? 'Guardando...' : (isEditMode ? 'Actualizar Pregunta' : 'Crear Pregunta') }}
+      </button>
+    </div>
+  </form>
+</div>

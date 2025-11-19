@@ -1,0 +1,197 @@
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">Statistics Dashboard</h1>
+      <p class="mt-2 text-sm text-gray-600">
+        Overview of your trivia system statistics and analytics
+      </p>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="text-center py-12">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      <p class="mt-4 text-gray-600">Loading statistics...</p>
+    </div>
+
+    <!-- Stats Content -->
+    <div *ngIf="!isLoading">
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Total Users Card -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 bg-blue-500 rounded-lg p-3">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+              </svg>
+            </div>
+            <div class="ml-4 flex-1">
+              <p class="text-sm font-medium text-gray-600">Total Users</p>
+              <p class="text-2xl font-bold text-gray-900">{{ stats.totalUsers }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Questions Card -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 bg-purple-500 rounded-lg p-3">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <div class="ml-4 flex-1">
+              <p class="text-sm font-medium text-gray-600">Total Questions</p>
+              <p class="text-2xl font-bold text-gray-900">{{ stats.totalQuestions }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Events Card -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 bg-green-500 rounded-lg p-3">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+            </div>
+            <div class="ml-4 flex-1">
+              <p class="text-sm font-medium text-gray-600">Total Events</p>
+              <p class="text-2xl font-bold text-gray-900">{{ stats.totalEvents }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Games Card -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 bg-yellow-500 rounded-lg p-3">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <div class="ml-4 flex-1">
+              <p class="text-sm font-medium text-gray-600">Total Games</p>
+              <p class="text-2xl font-bold text-gray-900">{{ stats.totalGames }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Questions by Category Chart -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6">Questions by Category</h3>
+          
+          <div *ngIf="categoryChartData.length === 0" class="text-center py-12 text-gray-500">
+            No category data available
+          </div>
+
+          <div *ngIf="categoryChartData.length > 0" class="space-y-4">
+            <div *ngFor="let item of categoryChartData" class="relative">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-sm font-medium text-gray-700">{{ item.category }}</span>
+                <span class="text-sm text-gray-600">{{ item.count }}</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-6 overflow-hidden">
+                <div
+                  class="bg-purple-600 h-6 rounded-full flex items-center justify-end pr-2 transition-all duration-500"
+                  [style.width]="getCategoryBarWidth(item.count)"
+                >
+                  <span class="text-xs text-white font-medium" *ngIf="item.count > 0">
+                    {{ ((item.count / getMaxCategoryCount()) * 100).toFixed(0) }}%
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Questions by Difficulty Chart -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6">Questions by Difficulty</h3>
+          
+          <div *ngIf="getTotalQuestions() === 0" class="text-center py-12 text-gray-500">
+            No difficulty data available
+          </div>
+
+          <div *ngIf="getTotalQuestions() > 0" class="flex flex-col items-center">
+            <!-- Pie Chart Visualization -->
+            <div class="relative w-48 h-48 mb-6">
+              <svg viewBox="0 0 100 100" class="transform -rotate-90">
+                <!-- Easy slice (green) -->
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="40"
+                  fill="none"
+                  [attr.stroke-dasharray]="getDifficultyAngle('easy').size * 2.51 + ' 251'"
+                  [attr.stroke-dashoffset]="0"
+                  stroke="#10B981"
+                  stroke-width="20"
+                  class="transition-all duration-500"
+                />
+                <!-- Medium slice (yellow) -->
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="40"
+                  fill="none"
+                  [attr.stroke-dasharray]="getDifficultyAngle('medium').size * 2.51 + ' 251'"
+                  [attr.stroke-dashoffset]="-getDifficultyAngle('medium').start * 2.51"
+                  stroke="#F59E0B"
+                  stroke-width="20"
+                  class="transition-all duration-500"
+                />
+                <!-- Hard slice (red) -->
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="40"
+                  fill="none"
+                  [attr.stroke-dasharray]="getDifficultyAngle('hard').size * 2.51 + ' 251'"
+                  [attr.stroke-dashoffset]="-getDifficultyAngle('hard').start * 2.51"
+                  stroke="#EF4444"
+                  stroke-width="20"
+                  class="transition-all duration-500"
+                />
+              </svg>
+              <div class="absolute inset-0 flex items-center justify-center">
+                <div class="text-center">
+                  <p class="text-2xl font-bold text-gray-900">{{ getTotalQuestions() }}</p>
+                  <p class="text-xs text-gray-600">Total</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="w-full space-y-3">
+              <div *ngFor="let item of difficultyChartData" class="flex items-center justify-between">
+                <div class="flex items-center">
+                  <div class="w-4 h-4 rounded mr-3"
+                       [class.bg-green-500]="item.difficulty === 'Easy'"
+                       [class.bg-yellow-500]="item.difficulty === 'Medium'"
+                       [class.bg-red-500]="item.difficulty === 'Hard'">
+                  </div>
+                  <span class="text-sm font-medium text-gray-700">{{ item.difficulty }}</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <span class="text-sm text-gray-600">{{ item.count }}</span>
+                  <span class="text-sm text-gray-500">({{ getDifficultyPercentage(item.count) }}%)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
