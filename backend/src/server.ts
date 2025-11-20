@@ -97,22 +97,20 @@ async function startServer() {
     const io = initializeGameSocket(httpServer);
     console.log('✅ Socket.IO initialized');
 
-    // Start server - Listen on all network interfaces
-    const localIP = '10.45.3.141';
+    // Start server - Listen on all interfaces for cloud deployments
     httpServer.listen(PORT, () => {
+      const host = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
       console.log(`🚀 Server running on:`);
-      console.log(`   - Local: http://localhost:${PORT}`);
-      console.log(`   - Network: http://${localIP}:${PORT}`);
+      console.log(`   - URL: ${host}`);
       console.log(`📊 API endpoints:`);
-      console.log(`   - http://${localIP}:${PORT}/api/auth (Authentication)`);
-      console.log(`   - http://${localIP}:${PORT}/api/admin (Admin Panel)`);
-      console.log(`   - http://${localIP}:${PORT}/api/events (Events)`);
-      console.log(`   - http://${localIP}:${PORT}/api/game (Game - Kahoot & Geoparty)`);
-      console.log(`   - http://${localIP}:${PORT}/api/trivia (Legacy V1)`);
+      console.log(`   - ${host}/api/auth (Authentication)`);
+      console.log(`   - ${host}/api/admin (Admin Panel)`);
+      console.log(`   - ${host}/api/events (Events)`);
+      console.log(`   - ${host}/api/game (Game - Kahoot, Geoparty & Word Search)`);
+      console.log(`   - ${host}/api/trivia (Legacy V1)`);
       console.log(`\n🎮 WebSocket:`);
-      console.log(`   - ws://${localIP}:${PORT}/game (Real-time game events)`);
-      console.log(`\n💡 Use the seed script to populate initial data:`);
-      console.log(`   npm run seed`);
+      console.log(`   - ${host}/game (Real-time game events)`);
+      console.log(`\n💡 Health check: ${host}/health`);
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);
