@@ -28,12 +28,14 @@ const getDatabaseConfig = () => {
   };
 };
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 export const AppDataSource = new DataSource({
   ...getDatabaseConfig(),
-  synchronize: process.env.NODE_ENV === 'development', // only in development
-  logging: process.env.NODE_ENV === 'development',
-  entities: ['src/entities/**/*.ts'],
-  migrations: ['src/migrations/**/*.ts'],
+  synchronize: true, // Auto-create tables (use migrations for production later)
+  logging: !isProduction,
+  entities: isProduction ? ['dist/entities/**/*.js'] : ['src/entities/**/*.ts'],
+  migrations: isProduction ? ['dist/migrations/**/*.js'] : ['src/migrations/**/*.ts'],
   subscribers: [],
 });
 
