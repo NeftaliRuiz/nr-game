@@ -30,11 +30,22 @@ const getDatabaseConfig = () => {
 
 const isProduction = process.env.NODE_ENV === 'production';
 
+// Import entities directly for production to avoid path issues
+import { User } from '../entities/User';
+import { Event } from '../entities/Event';
+import { Game } from '../entities/Game';
+import { GameParticipant } from '../entities/GameParticipant';
+import { Question } from '../entities/Question';
+import { Team } from '../entities/Team';
+import { Answer } from '../entities/Answer';
+
 export const AppDataSource = new DataSource({
   ...getDatabaseConfig(),
   synchronize: true, // Auto-create tables (use migrations for production later)
   logging: !isProduction,
-  entities: isProduction ? ['dist/entities/**/*.js'] : ['src/entities/**/*.ts'],
+  entities: isProduction 
+    ? [User, Event, Game, GameParticipant, Question, Team, Answer]
+    : ['src/entities/**/*.ts'],
   migrations: isProduction ? ['dist/migrations/**/*.js'] : ['src/migrations/**/*.ts'],
   subscribers: [],
 });

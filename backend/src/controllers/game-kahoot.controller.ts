@@ -8,14 +8,6 @@ import { Question } from '../entities/Question';
 import { Answer } from '../entities/Answer';
 import { Event } from '../entities/Event';
 
-const gameRepository = AppDataSource.getRepository(Game);
-const participantRepository = AppDataSource.getRepository(GameParticipant);
-const userRepository = AppDataSource.getRepository(User);
-const teamRepository = AppDataSource.getRepository(Team);
-const questionRepository = AppDataSource.getRepository(Question);
-const answerRepository = AppDataSource.getRepository(Answer);
-const eventRepository = AppDataSource.getRepository(Event);
-
 /**
  * Generate a unique 6-character room code
  */
@@ -34,6 +26,9 @@ function generateRoomCode(): string {
  */
 export async function createKahootGame(req: Request, res: Response): Promise<void> {
   try {
+    const gameRepository = AppDataSource.getRepository(Game);
+    const eventRepository = AppDataSource.getRepository(Event);
+    
     const { name, eventId, totalQuestions } = req.body;
 
     // Validate event if provided
@@ -114,6 +109,10 @@ export async function createKahootGame(req: Request, res: Response): Promise<voi
  */
 export async function joinKahootGame(req: Request, res: Response): Promise<void> {
   try {
+    const gameRepository = AppDataSource.getRepository(Game);
+    const participantRepository = AppDataSource.getRepository(GameParticipant);
+    const userRepository = AppDataSource.getRepository(User);
+    
     const { gameId } = req.params;
     const { userId, teamId } = req.body;
 
@@ -190,6 +189,9 @@ export async function joinKahootGame(req: Request, res: Response): Promise<void>
  */
 export async function startKahootGame(req: Request, res: Response): Promise<void> {
   try {
+    const gameRepository = AppDataSource.getRepository(Game);
+    const questionRepository = AppDataSource.getRepository(Question);
+    
     const { gameId } = req.params;
 
     const game = await gameRepository.findOne({
@@ -210,7 +212,7 @@ export async function startKahootGame(req: Request, res: Response): Promise<void
     await gameRepository.save(game);
 
     // Get first random question
-    const firstQuestion = await getRandomQuestion(game);
+    const firstQuestion = await getRandomQuestion(game, questionRepository, gameRepository);
 
     res.json({
       success: true,
@@ -236,7 +238,7 @@ export async function startKahootGame(req: Request, res: Response): Promise<void
 /**
  * Helper: Get random question for game
  */
-async function getRandomQuestion(game: Game): Promise<Question | null> {
+async function getRandomQuestion(game: Game, questionRepository: any, gameRepository: any): Promise<Question | null> {
   const queryBuilder = questionRepository.createQueryBuilder('question');
 
   // Filter by event if specified
@@ -281,6 +283,11 @@ async function getRandomQuestion(game: Game): Promise<Question | null> {
  */
 export async function submitKahootAnswer(req: Request, res: Response): Promise<void> {
   try {
+    const gameRepository = AppDataSource.getRepository(Game);
+    const participantRepository = AppDataSource.getRepository(GameParticipant);
+    const questionRepository = AppDataSource.getRepository(Question);
+    const answerRepository = AppDataSource.getRepository(Answer);
+    
     const { gameId } = req.params;
     const { participantId, questionId, selectedAnswer, timeRemaining } = req.body;
 
@@ -391,6 +398,9 @@ export async function submitKahootAnswer(req: Request, res: Response): Promise<v
  */
 export async function nextKahootQuestion(req: Request, res: Response): Promise<void> {
   try {
+    const gameRepository = AppDataSource.getRepository(Game);
+    const questionRepository = AppDataSource.getRepository(Question);
+    
     const { gameId } = req.params;
 
     const game = await gameRepository.findOne({ 
@@ -428,7 +438,7 @@ export async function nextKahootQuestion(req: Request, res: Response): Promise<v
     }
 
     // Get next question
-    const nextQuestion = await getRandomQuestion(game);
+    const nextQuestion = await getRandomQuestion(game, questionRepository, gameRepository);
 
     if (!nextQuestion) {
       // No more questions available
@@ -478,6 +488,9 @@ export async function nextKahootQuestion(req: Request, res: Response): Promise<v
  */
 export async function getKahootLeaderboard(req: Request, res: Response): Promise<void> {
   try {
+    const gameRepository = AppDataSource.getRepository(Game);
+    const participantRepository = AppDataSource.getRepository(GameParticipant);
+    
     const { gameId } = req.params;
 
     const game = await gameRepository.findOne({ 
@@ -531,6 +544,9 @@ export async function getKahootLeaderboard(req: Request, res: Response): Promise
  */
 export async function getKahootGame(req: Request, res: Response): Promise<void> {
   try {
+    const gameRepository = AppDataSource.getRepository(Game);
+    const participantRepository = AppDataSource.getRepository(GameParticipant);
+    
     const { gameId } = req.params;
 
     const game = await gameRepository.findOne({

@@ -7,13 +7,6 @@ import { Question } from '../entities/Question';
 import { Answer } from '../entities/Answer';
 import { Event } from '../entities/Event';
 
-const gameRepository = AppDataSource.getRepository(Game);
-const participantRepository = AppDataSource.getRepository(GameParticipant);
-const userRepository = AppDataSource.getRepository(User);
-const questionRepository = AppDataSource.getRepository(Question);
-const answerRepository = AppDataSource.getRepository(Answer);
-const eventRepository = AppDataSource.getRepository(Event);
-
 // In-memory map to track per-game team scores (non-persistent)
 const gameTeamScores: Map<string, Map<string, number>> = new Map();
 
@@ -38,6 +31,9 @@ function generateRoomCode(): string {
  */
 export async function createGeopartyGame(req: Request, res: Response): Promise<void> {
   try {
+    const gameRepository = AppDataSource.getRepository(Game);
+    const eventRepository = AppDataSource.getRepository(Event);
+
     const { name, eventId, totalQuestions } = req.body;
 
     // Validate event if provided
@@ -117,6 +113,10 @@ export async function createGeopartyGame(req: Request, res: Response): Promise<v
  */
 export async function joinGeopartyGame(req: Request, res: Response): Promise<void> {
   try {
+    const gameRepository = AppDataSource.getRepository(Game);
+    const participantRepository = AppDataSource.getRepository(GameParticipant);
+    const userRepository = AppDataSource.getRepository(User);
+
     const { roomCode } = req.params;
     const { userId } = req.body;
 
@@ -205,6 +205,8 @@ export async function joinGeopartyGame(req: Request, res: Response): Promise<voi
  */
 export async function startGeopartyGame(req: Request, res: Response): Promise<void> {
   try {
+    const gameRepository = AppDataSource.getRepository(Game);
+
     const { roomCode } = req.params;
 
     const game = await gameRepository.findOne({
@@ -251,6 +253,9 @@ export async function startGeopartyGame(req: Request, res: Response): Promise<vo
  */
 export async function selectQuestion(req: Request, res: Response): Promise<void> {
   try {
+    const gameRepository = AppDataSource.getRepository(Game);
+    const questionRepository = AppDataSource.getRepository(Question);
+
     const { roomCode } = req.params;
     const { category } = req.body;
 
@@ -326,6 +331,9 @@ export async function selectQuestion(req: Request, res: Response): Promise<void>
  */
 export async function reserveCell(req: Request, res: Response): Promise<void> {
   try {
+    const gameRepository = AppDataSource.getRepository(Game);
+    const questionRepository = AppDataSource.getRepository(Question);
+
     const { roomCode } = req.params;
     const { categoryId, rowIndex, participantId, teamId } = req.body;
 
@@ -382,6 +390,11 @@ export async function reserveCell(req: Request, res: Response): Promise<void> {
  */
 export async function submitGeopartyAnswer(req: Request, res: Response): Promise<void> {
   try {
+    const gameRepository = AppDataSource.getRepository(Game);
+    const participantRepository = AppDataSource.getRepository(GameParticipant);
+    const questionRepository = AppDataSource.getRepository(Question);
+    const answerRepository = AppDataSource.getRepository(Answer);
+
     const { roomCode } = req.params;
     const { participantId, questionId, selectedAnswer, timeRemaining, teamId } = req.body;
 
@@ -523,6 +536,9 @@ export async function submitGeopartyAnswer(req: Request, res: Response): Promise
  */
 export async function getGeopartyLeaderboard(req: Request, res: Response): Promise<void> {
   try {
+    const gameRepository = AppDataSource.getRepository(Game);
+    const participantRepository = AppDataSource.getRepository(GameParticipant);
+
     const { roomCode } = req.params;
 
     const game = await gameRepository.findOne({ where: { roomCode: roomCode.toUpperCase() } });
@@ -572,6 +588,9 @@ export async function getGeopartyLeaderboard(req: Request, res: Response): Promi
  */
 export async function getGeopartyGame(req: Request, res: Response): Promise<void> {
   try {
+    const gameRepository = AppDataSource.getRepository(Game);
+    const participantRepository = AppDataSource.getRepository(GameParticipant);
+
     const { roomCode } = req.params;
 
     const game = await gameRepository.findOne({

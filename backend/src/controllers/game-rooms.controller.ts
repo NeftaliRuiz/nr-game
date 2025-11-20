@@ -3,15 +3,14 @@ import { AppDataSource } from '../config/database';
 import { Game, GameStatus } from '../entities/Game';
 import { GameParticipant } from '../entities/GameParticipant';
 
-const gameRepository = AppDataSource.getRepository(Game);
-const participantRepository = AppDataSource.getRepository(GameParticipant);
-
 /**
  * Get all active game rooms (waiting or in_progress)
  * GET /api/game/rooms
  */
 export async function getActiveGameRooms(req: Request, res: Response): Promise<void> {
   try {
+    const gameRepository = AppDataSource.getRepository(Game);
+    const participantRepository = AppDataSource.getRepository(GameParticipant);
     // Find games that are waiting or in progress
     const games = await gameRepository.find({
       where: [
@@ -69,6 +68,8 @@ export async function getActiveGameRooms(req: Request, res: Response): Promise<v
  */
 export async function getGameRoomByCode(req: Request, res: Response): Promise<void> {
   try {
+    const gameRepository = AppDataSource.getRepository(Game);
+    const participantRepository = AppDataSource.getRepository(GameParticipant);
     const { roomCode } = req.params;
 
     const game = await gameRepository.findOne({

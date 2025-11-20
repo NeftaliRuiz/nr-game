@@ -5,10 +5,6 @@ import { GameParticipant } from '../entities/GameParticipant';
 import { User } from '../entities/User';
 import { emitToGame } from '../socket/game-socket';
 
-const gameRepository = AppDataSource.getRepository(Game);
-const participantRepository = AppDataSource.getRepository(GameParticipant);
-const userRepository = AppDataSource.getRepository(User);
-
 // In-memory storage for word search game data (tableros por jugador, palabras encontradas, tiempos)
 const wordSearchGames: Map<string, {
   words: string[];
@@ -118,6 +114,7 @@ function generateWordSearchGrid(words: string[], gridSize: number = 15): string[
  */
 export async function createWordSearchGame(req: Request, res: Response): Promise<void> {
   try {
+    const gameRepository = AppDataSource.getRepository(Game);
     const { name, eventId, words, gridSize = 15, timeLimit = 300, useSharedGrid = true } = req.body;
 
     if (!words || !Array.isArray(words) || words.length === 0) {
@@ -218,6 +215,9 @@ export async function createWordSearchGame(req: Request, res: Response): Promise
  */
 export async function joinWordSearchGame(req: Request, res: Response): Promise<void> {
   try {
+    const gameRepository = AppDataSource.getRepository(Game);
+    const participantRepository = AppDataSource.getRepository(GameParticipant);
+    const userRepository = AppDataSource.getRepository(User);
     const { roomCode } = req.params;
     const { userId } = req.body;
 
@@ -343,6 +343,7 @@ export async function joinWordSearchGame(req: Request, res: Response): Promise<v
  */
 export async function startWordSearchGame(req: Request, res: Response): Promise<void> {
   try {
+    const gameRepository = AppDataSource.getRepository(Game);
     const { roomCode } = req.params;
 
     const game = await gameRepository.findOne({
@@ -440,6 +441,7 @@ export async function startWordSearchGame(req: Request, res: Response): Promise<
  */
 export async function getPlayerGrid(req: Request, res: Response): Promise<void> {
   try {
+    const gameRepository = AppDataSource.getRepository(Game);
     const { roomCode, participantId } = req.params;
 
     const game = await gameRepository.findOne({ where: { roomCode: roomCode.toUpperCase() } });
@@ -493,6 +495,8 @@ export async function getPlayerGrid(req: Request, res: Response): Promise<void> 
  */
 export async function submitFoundWord(req: Request, res: Response): Promise<void> {
   try {
+    const gameRepository = AppDataSource.getRepository(Game);
+    const participantRepository = AppDataSource.getRepository(GameParticipant);
     const { roomCode } = req.params;
     const { participantId, word } = req.body;
 
@@ -613,6 +617,8 @@ export async function submitFoundWord(req: Request, res: Response): Promise<void
  */
 export async function getWordSearchLeaderboard(req: Request, res: Response): Promise<void> {
   try {
+    const gameRepository = AppDataSource.getRepository(Game);
+    const participantRepository = AppDataSource.getRepository(GameParticipant);
     const { roomCode } = req.params;
 
     const game = await gameRepository.findOne({ where: { roomCode: roomCode.toUpperCase() } });
@@ -643,6 +649,7 @@ export async function getWordSearchLeaderboard(req: Request, res: Response): Pro
  * Helper: Get leaderboard data
  */
 async function getLeaderboardData(gameId: string): Promise<any[]> {
+  const participantRepository = AppDataSource.getRepository(GameParticipant);
   const participants = await participantRepository.find({
     where: { gameId },
     relations: ['user'],
@@ -651,7 +658,7 @@ async function getLeaderboardData(gameId: string): Promise<any[]> {
 
   const gameData = wordSearchGames.get(gameId);
 
-  return participants.map((p, index) => {
+  return participants.map((p: GameParticipant, index: number) => {
     const playerBoard = gameData?.playerBoards.get(p.id);
     const timeElapsed = playerBoard?.endTime && playerBoard?.startTime
       ? Math.floor((playerBoard.endTime - playerBoard.startTime) / 1000)
@@ -695,6 +702,7 @@ async function getLeaderboardData(gameId: string): Promise<any[]> {
  */
 export async function getWordSearchGame(req: Request, res: Response): Promise<void> {
   try {
+    const gameRepository = AppDataSource.getRepository(Game);
     const { roomCode } = req.params;
 
     const game = await gameRepository.findOne({
@@ -770,6 +778,7 @@ export async function getWordSearchGame(req: Request, res: Response): Promise<vo
  */
 export async function finishWordSearchGame(req: Request, res: Response): Promise<void> {
   try {
+    const gameRepository = AppDataSource.getRepository(Game);
     const { roomCode } = req.params;
 
     // Find the game
