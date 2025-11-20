@@ -4,13 +4,32 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
+// Parse DATABASE_URL if provided (for Railway, Render, Heroku, etc.)
+const getDatabaseConfig = () => {
+  const databaseUrl = process.env.DATABASE_URL;
+  
+  if (databaseUrl) {
+    // Use DATABASE_URL directly
+    return {
+      type: 'postgres' as const,
+      url: databaseUrl,
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    };
+  }
+  
+  // Fallback to individual environment variables (local development)
+  return {
+    type: 'postgres' as const,
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT || '5432'),
+    username: process.env.DB_USERNAME || 'trivia_user',
+    password: process.env.DB_PASSWORD || 'trivia_pass',
+    database: process.env.DB_DATABASE || 'trivia_db',
+  };
+};
+
 export const AppDataSource = new DataSource({
-  type: 'postgres',
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432'),
-  username: process.env.DB_USERNAME || 'trivia_user',
-  password: process.env.DB_PASSWORD || 'trivia_pass',
-  database: process.env.DB_DATABASE || 'trivia_db',
+  ...getDatabaseConfig(),
   synchronize: process.env.NODE_ENV === 'development', // only in development
   logging: process.env.NODE_ENV === 'development',
   entities: ['src/entities/**/*.ts'],
