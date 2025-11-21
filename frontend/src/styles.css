@@ -193,3 +193,27 @@ label {
 .dark label {
   color: #e5e7eb !important; /* Gray-200 */
 }
+
+/* QR Code Styles */
+.qr-code-border {
+  padding: 10px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Fade-in animation for QR code */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

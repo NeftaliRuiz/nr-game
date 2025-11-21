@@ -149,6 +149,16 @@ export class GameCreatorComponent implements OnInit {
     }
   }
 
+  showQR: Map<string, boolean> = new Map();
+
+  toggleQR(gameId: string): void {
+    this.showQR.set(gameId, !this.showQR.get(gameId));
+  }
+
+  getGameJoinUrl(code: string): string {
+    return `${window.location.origin}/join?code=${code}`;
+  }
+
   goToGame(game: any): void {
     if (game) {
       // Use roomCode for navigation if available (for Geoparty), otherwise use id
