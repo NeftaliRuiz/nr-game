@@ -1,6 +1,13 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import * as dotenv from 'dotenv';
+import { User } from '../entities/User';
+import { Event } from '../entities/Event';
+import { Game } from '../entities/Game';
+import { GameParticipant } from '../entities/GameParticipant';
+import { Question } from '../entities/Question';
+import { Answer } from '../entities/Answer';
+import { Team } from '../entities/Team';
 
 dotenv.config();
 
@@ -34,9 +41,7 @@ export const AppDataSource = new DataSource({
   ...getDatabaseConfig(),
   synchronize: true, // Auto-create tables (use migrations for production later)
   logging: !isProduction,
-  entities: isProduction 
-    ? ['dist/entities/**/*.js']
-    : ['src/entities/**/*.ts'],
+  entities: [User, Event, Game, GameParticipant, Question, Answer, Team],
   migrations: isProduction ? ['dist/migrations/**/*.js'] : ['src/migrations/**/*.ts'],
   subscribers: [],
 });
