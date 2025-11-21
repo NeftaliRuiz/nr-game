@@ -688,10 +688,10 @@ async function getLeaderboardData(gameId: string): Promise<any[]> {
       userId: p.userId,
       userName: userName,
       score: p.score,
-      wordsFound: p.correctAnswers,
+      foundWordsCount: p.correctAnswers,
       totalWords: gameData?.words.length || 0,
       timeElapsed,
-      finished: playerBoard?.foundWords.size === gameData?.words.length,
+      isFinished: playerBoard?.foundWords.size === gameData?.words.length,
     };
   });
 }
