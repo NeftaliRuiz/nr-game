@@ -821,6 +821,16 @@ export class GameWordsearchComponent implements OnInit, OnDestroy {
     setTimeout(() => this.message = '', 2000);
   }
 
+  showQR: boolean = false;
+
+  toggleQR(): void {
+    this.showQR = !this.showQR;
+  }
+
+  getGameJoinUrl(): string {
+    return `${window.location.origin}/game/wordsearch/${this.roomCode}`;
+  }
+
   shareGame(): void {
     const url = `${window.location.origin}/game/wordsearch/${this.roomCode}`;
     if (navigator.share) {
