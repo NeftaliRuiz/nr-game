@@ -212,14 +212,14 @@
               (click)="copyRoomCode()"
               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
             >
-              📋 Copiar código
+              Copiar código
             </button>
             <button
               (click)="toggleQR()"
               class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors"
               title="Mostrar/Ocultar código QR"
             >
-              {{ showQR ? '🔼 Ocultar QR' : '📱 Mostrar QR' }}
+              {{ showQR ? 'Ocultar QR' : 'Mostrar QR' }}
             </button>
           </div>
           
@@ -386,17 +386,7 @@
     <div *ngIf="!isHost" class="flex h-screen">
     <!-- LEFT PANEL - Participants -->
     <div class="w-72 bg-gray-900 p-4 overflow-y-auto border-r border-gray-700">
-      <!-- Instructions -->
-      <div class="mb-6 bg-blue-900/30 border border-blue-700 rounded-lg p-4">
-        <h3 class="text-sm font-bold mb-2 text-blue-400 uppercase tracking-wide">Cómo jugar</h3>
-        <ol class="text-xs text-gray-300 space-y-2">
-          <li><span class="font-semibold">1.</span> Haz clic en la primera letra de una palabra</li>
-          <li><span class="font-semibold">2.</span> Mantén presionado y arrastra hasta la última letra</li>
-          <li><span class="font-semibold">3.</span> Suelta el mouse para validar</li>
-          <li><span class="font-semibold">4.</span> Las palabras pueden estar en cualquier dirección: horizontal, vertical o diagonal</li>
-          <li><span class="font-semibold">5.</span> Las celdas azules indican selección, las verdes son palabras encontradas</li>
-        </ol>
-      </div>
+     
       
       <!-- User Info -->
       <div class="mb-6 bg-gray-800 rounded-lg p-4 border border-gray-700">
@@ -427,12 +417,12 @@
       </button>
 
       <!-- Share Button -->
-      <button
+      <!-- <button
         (click)="shareGame()"
         class="w-full bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-all mb-6"
       >
         Compartir invitación
-      </button>
+      </button> -->
 
       <!-- Found Words History -->
       <div *ngIf="foundWordsHistory.length > 0" class="mb-6">
@@ -449,7 +439,7 @@
       </div>
 
       <!-- Participants List -->
-      <div class="space-y-2">
+      <div class="space-y-2 p-4">
         <h3 class="text-sm font-bold mb-3 text-gray-300 uppercase tracking-wide">Jugadores ({{ totalParticipants }})</h3>
         <div
           *ngFor="let participant of participants"
@@ -461,7 +451,7 @@
             <span class="font-semibold truncate text-white">{{ participant.userName }}</span>
             <span *ngIf="participant.id === participantId" class="text-xs bg-blue-600 text-white px-2 py-1 rounded font-medium">TÚ</span>
           </div>
-          <div class="mt-2">
+          <!-- <div class="mt-2">
             <div class="flex justify-between text-xs text-gray-400 mb-1">
               <span>{{ participant.foundWordsCount }}/{{ targetWordsCount }} palabras</span>
               <span class="text-blue-400 font-semibold">{{ participant.score }} pts</span>
@@ -473,14 +463,26 @@
               ></div>
             </div>
           </div>
-          <span *ngIf="participant.isFinished" class="text-xs text-green-400 mt-2 block font-medium">Completado</span>
+          <span *ngIf="participant.isFinished" class="text-xs text-green-400 mt-2 block font-medium">Completado</span> -->
         </div>
+      </div>
+
+       <!-- Instructions -->
+      <div class="mb-6 bg-blue-900/30 border border-blue-700 rounded-lg p-4">
+        <h3 class="text-sm font-bold mb-2 text-blue-400 uppercase tracking-wide">Cómo jugar</h3>
+        <ol class="text-xs text-gray-300 space-y-2">
+          <li><span class="font-semibold">1.</span> Haz clic en la primera letra de una palabra</li>
+          <li><span class="font-semibold">2.</span> Mantén presionado y arrastra hasta la última letra</li>
+          <li><span class="font-semibold">3.</span> Suelta el mouse para validar</li>
+          <li><span class="font-semibold">4.</span> Las palabras pueden estar en cualquier dirección: horizontal, vertical o diagonal</li>
+          <li><span class="font-semibold">5.</span> Las celdas azules indican selección, las verdes son palabras encontradas</li>
+        </ol>
       </div>
     </div>
 
     <!-- CENTER - Game Grid -->
     <div class="flex-1 p-6 overflow-y-auto">
-      <div class="max-w-5xl mx-auto">
+      <div class="max-w-6xl mx-auto">
         <!-- Header -->
         <div class="mb-6 text-center">
           <h1 class="text-4xl font-bold mb-2 text-white">Sopa de Letras</h1>
@@ -507,7 +509,7 @@
             <div class="bg-white/10 rounded-lg px-6 py-3">
               <div class="text-sm text-gray-400">Palabras</div>
               <div class="text-2xl font-bold text-green-400">
-                {{ myFoundWordsCount }}/{{ targetWordsCount }}
+                {{ foundWords.size }}/{{ targetWordsCount }}
               </div>
             </div>
           </div>
@@ -563,32 +565,14 @@
             </div>
           </div>
         </div>
-
-        <!-- Words List - Moved to bottom -->
-        <div class="rounded-xl p-6 backdrop-blur-lg mt-6" [ngClass]="{'bg-white/10': true}">
-          <h3 class="text-xl font-bold mb-4">Palabras a encontrar</h3>
-          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            <div
-              *ngFor="let word of words"
-              class="px-4 py-2 rounded-lg text-center font-semibold transition-all"
-              [ngClass]="{
-                'bg-green-500': isWordFound(word),
-                'line-through': isWordFound(word),
-                'bg-white/5': !isWordFound(word)
-              }"
-            >
-              {{ word }}
-            </div>
-          </div>
-        </div>
       </div>
     </div>
 
     <!-- RIGHT PANEL - Words List -->
-    <div class="w-72 bg-black/40 backdrop-blur-lg p-4 overflow-y-auto border-l border-white/10">
-      <h2 class="text-2xl font-bold mb-4 text-center">📝 Palabras</h2>
+    <div class="w-64 bg-black/40 backdrop-blur-lg p-4 pr-0 overflow-y-auto border-l border-white/10">
+      <h2 class="text-2xl font-bold mb-4">Palabras</h2>
       
-      <div class="space-y-2">
+      <div class="space-y-2 pr-4">
         <div
           *ngFor="let word of words; let i = index"
           class="rounded-lg p-3 transition-all"
@@ -613,7 +597,7 @@
       </div>
 
       <!-- Progress Summary -->
-      <div class="mt-6 bg-blue-900/20 border border-blue-700 rounded-lg p-4">
+      <div class="mt-6 mr-4 bg-blue-900/20 border border-blue-700 rounded-lg p-4">
         <div class="text-center">
           <div class="text-3xl font-bold text-blue-400">{{ foundWords.size }}/{{ words.length }}</div>
           <div class="text-sm text-gray-400 mt-1">Palabras encontradas</div>

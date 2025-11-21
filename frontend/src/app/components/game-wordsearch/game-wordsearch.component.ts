@@ -451,6 +451,14 @@ export class GameWordsearchComponent implements OnInit, OnDestroy {
       this.websocketService.joinRoom(this.roomCode);
     }, 500);
 
+    // Listen to timer updates (MUST be before game starts)
+    this.websocketService.on('timer-tick')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data: any) => {
+        console.log('[TIMER] Received timer-tick:', data.timeRemaining);
+        this.timeRemaining = data.timeRemaining;
+      });
+
     // Participant joined
     this.websocketService.on('participant-joined')
       .pipe(takeUntil(this.destroy$))
@@ -580,6 +588,8 @@ export class GameWordsearchComponent implements OnInit, OnDestroy {
     const storageKey = `wordsearch_${this.roomCode}_${this.participantId}`;
     localStorage.removeItem(storageKey);
     localStorage.removeItem('hostRoom');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('userId');
     
     // Reset state
     this.foundWords.clear();
@@ -590,8 +600,10 @@ export class GameWordsearchComponent implements OnInit, OnDestroy {
     this.isGridLocked = false;
     this.gameStatus = 'WAITING';
     
-    // Redirect to wordsearch game selection
-    this.router.navigate(['/game/wordsearch']);
+    // Redirect to wordsearch game selection and reload page
+    this.router.navigate(['/game/wordsearch']).then(() => {
+      window.location.reload();
+    });
   }
 
   formatTime(seconds: number): string {
@@ -896,6 +908,12 @@ export class GameWordsearchComponent implements OnInit, OnDestroy {
     // Save user name
     this.userName = this.tempUserName.trim();
     localStorage.setItem('userName', this.userName);
+    
+    // Generate and save userId
+    this.userId = this.generateGuestId();
+    localStorage.setItem('userId', this.userId);
+    
+    console.log('[JOIN-FORM] Saved userName:', this.userName, 'userId:', this.userId);
 
     // Navigate to game room
     const code = this.joinRoomCode.trim().toUpperCase();

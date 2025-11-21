@@ -1,5 +1,7 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://10.45.3.141:3001/api',
-  socketUrl: 'http://10.45.3.141:3001'
+  apiUrl1: 'http://10.45.3.141:3001/api',
+  socketUrl1: 'http://10.45.3.141:3001',
+  apiUrl: 'http://localhost:3001/api',
+  socketUrl: 'http://localhost:3001'
 };
