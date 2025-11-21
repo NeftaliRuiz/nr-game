@@ -159,7 +159,7 @@ export interface SelectQuestionResponse {
 })
 export class GameService {
   // NOTE: backend in this workspace runs on port 3001 (see backend/server logs)
-  private readonly API_URL = environment.apiUrl.replace('/api', '/api/game');
+  private readonly API_URL = `${environment.apiUrl}/game`;
 
   constructor(private http: HttpClient) {}
 
