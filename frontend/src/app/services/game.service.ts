@@ -160,6 +160,7 @@ export interface SelectQuestionResponse {
 export class GameService {
   // NOTE: backend in this workspace runs on port 3001 (see backend/server logs)
   private readonly API_URL = `${environment.apiUrl}/game`;
+  private readonly QUESTIONS_URL = `${environment.apiUrl}/questions`;
 
   constructor(private http: HttpClient) {}
 
@@ -228,6 +229,13 @@ export class GameService {
    */
   getEvents(): Observable<any> {
     return this.http.get<any>(`${environment.apiUrl}/events`);
+  }
+
+  /**
+   * Upload questions file and link to event
+   */
+  uploadQuestionsFile(formData: FormData): Observable<any> {
+    return this.http.post<any>(`${this.QUESTIONS_URL}/upload/save`, formData);
   }
 
   // ==================== GEOPARTY METHODS ====================

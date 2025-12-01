@@ -1,8 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { GameService, LeaderboardEntry } from '../../services/game.service';
 import { WebsocketService } from '../../services/websocket.service';
+import { environment } from '../../../environments/environment';
 
 interface Question {
   id: string;
@@ -40,6 +41,8 @@ interface SavedGame {
   styleUrls: ['./game-kahoot-host.component.css']
 })
 export class GameKahootHostComponent implements OnInit, OnDestroy {
+  @ViewChild('questionFileInput') questionFileInput?: ElementRef<HTMLInputElement>;
+
   // Game configuration
   gameId: string = '';
   roomCode: string = '';
@@ -85,6 +88,12 @@ export class GameKahootHostComponent implements OnInit, OnDestroy {
   errorMessage: string = '';
   successMessage: string = '';
   joinUrl: string = '';
+  questionFile: File | null = null;
+  questionFileName: string = '';
+  uploadedQuestionCount: number = 0;
+  questionUploadSummary: string = '';
+  isUploadingQuestions: boolean = false;
+  readonly questionTemplateUrl = `${environment.apiUrl}/questions/template`;
   
   // WebSocket subscriptions
   private subscriptions: Subscription[] = [];
@@ -194,6 +203,12 @@ export class GameKahootHostComponent implements OnInit, OnDestroy {
     });
   }
 
+  getSelectedEventName(): string {
+    if (!this.selectedEventId) return 'Selecciona un evento';
+    const event = this.events.find(e => e.id === this.selectedEventId);
+    return event?.name || 'Selecciona un evento';
+  }
+
   // ==================== NAVIGATION ====================
 
   goToMenu(): void {
@@ -217,6 +232,8 @@ export class GameKahootHostComponent implements OnInit, OnDestroy {
     this.leaderboard = [];
     this.answersReceived = 0;
     this.answerDistribution = [0, 0, 0, 0];
+    this.uploadedQuestionCount = 0;
+    this.questionUploadSummary = '';
   }
 
   resumeGame(savedGame: SavedGame): void {
@@ -279,6 +296,12 @@ export class GameKahootHostComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (this.questionFile && !this.selectedEventId) {
+      this.errorMessage = 'Selecciona un evento para asociar las preguntas que subas.';
+      setTimeout(() => this.errorMessage = '', 3500);
+      return;
+    }
+
     this.isLoading = true;
 
     const createData: any = {
@@ -290,45 +313,116 @@ export class GameKahootHostComponent implements OnInit, OnDestroy {
       createData.eventId = this.selectedEventId;
     }
 
-    this.gameService.createKahootGame(createData).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.gameId = response.data.game.id;
-          this.roomCode = response.data.game.roomCode || '';
-          this.totalQuestions = this.questionCount;
-          
-          // Update join URL
-          this.joinUrl = `${window.location.origin}/game/kahoot/join/${this.roomCode}`;
-          
-          // Save to localStorage as current game
-          localStorage.setItem('kahoot_host_game', JSON.stringify({
-            gameId: this.gameId,
-            roomCode: this.roomCode,
-            gameName: this.gameName
-          }));
-          
-          // Add to saved games history
-          this.addToSavedGames({
-            gameId: this.gameId,
-            roomCode: this.roomCode,
-            gameName: this.gameName,
-            createdAt: new Date().toISOString(),
-            status: 'waiting',
-            participantCount: 0
-          });
-          
-          this.gamePhase = 'lobby';
-          this.connectWebSocket();
+    const finishCreation = () => {
+      this.gameService.createKahootGame(createData).subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.gameId = response.data.game.id;
+            this.roomCode = response.data.game.roomCode || '';
+            this.totalQuestions = this.questionCount;
+            
+            // Update join URL
+            this.joinUrl = `${window.location.origin}/game/kahoot/join/${this.roomCode}`;
+            
+            // Save to localStorage as current game
+            localStorage.setItem('kahoot_host_game', JSON.stringify({
+              gameId: this.gameId,
+              roomCode: this.roomCode,
+              gameName: this.gameName
+            }));
+            
+            // Add to saved games history
+            this.addToSavedGames({
+              gameId: this.gameId,
+              roomCode: this.roomCode,
+              gameName: this.gameName,
+              createdAt: new Date().toISOString(),
+              status: 'waiting',
+              participantCount: 0
+            });
+            
+            this.gamePhase = 'lobby';
+            this.connectWebSocket();
+          }
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error creating game:', error);
+          this.errorMessage = 'Error al crear el juego';
+          setTimeout(() => this.errorMessage = '', 3000);
+          this.isLoading = false;
         }
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error creating game:', error);
-        this.errorMessage = 'Error al crear el juego';
-        setTimeout(() => this.errorMessage = '', 3000);
-        this.isLoading = false;
-      }
-    });
+      });
+    };
+
+    if (this.questionFile) {
+      this.isUploadingQuestions = true;
+      const formData = new FormData();
+      formData.append('file', this.questionFile);
+      formData.append('eventId', this.selectedEventId);
+      formData.append('gameMode', 'kahoot');
+
+      this.gameService.uploadQuestionsFile(formData).subscribe({
+        next: (response) => {
+          this.isUploadingQuestions = false;
+          this.uploadedQuestionCount = response?.data?.savedCount || 0;
+          this.questionUploadSummary = `Preguntas vinculadas al evento (${this.uploadedQuestionCount})`;
+          this.successMessage = `Se cargaron ${this.uploadedQuestionCount} preguntas para este evento`;
+          setTimeout(() => this.successMessage = '', 3000);
+          this.clearQuestionFileInput();
+          this.questionFile = null;
+          this.questionFileName = '';
+          finishCreation();
+        },
+        error: (error) => {
+          console.error('Error uploading questions:', error);
+          this.isUploadingQuestions = false;
+          this.isLoading = false;
+          this.errorMessage = error?.error?.message || 'No se pudieron subir las preguntas';
+          setTimeout(() => this.errorMessage = '', 4000);
+        }
+      });
+    } else {
+      finishCreation();
+    }
+  }
+
+  onQuestionFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) {
+      return;
+    }
+
+    const file = input.files[0];
+    const allowedExtensions = ['.xlsx', '.xls', '.csv'];
+    const fileName = file.name.toLowerCase();
+    const isValid = allowedExtensions.some(ext => fileName.endsWith(ext));
+
+    if (!isValid) {
+      this.errorMessage = 'Formato no compatible. Usa archivos .xlsx, .xls o .csv';
+      setTimeout(() => this.errorMessage = '', 3500);
+      this.clearQuestionFileInput();
+      return;
+    }
+
+    this.questionFile = file;
+    this.questionFileName = file.name;
+  }
+
+  removeQuestionFile(): void {
+    this.questionFile = null;
+    this.questionFileName = '';
+    this.clearQuestionFileInput();
+  }
+
+  downloadQuestionsTemplate(): void {
+    window.open(this.questionTemplateUrl, '_blank');
+  }
+
+  private clearQuestionFileInput(): void {
+    if (this.questionFileInput?.nativeElement) {
+      this.questionFileInput.nativeElement.value = '';
+    }
   }
 
   // ==================== WEBSOCKET ====================

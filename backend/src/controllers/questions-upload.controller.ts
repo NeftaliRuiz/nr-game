@@ -3,7 +3,8 @@ import { AppDataSource } from '../config/database';
 import { Question, QuestionDifficulty } from '../entities/Question';
 import { Event } from '../entities/Event';
 import { GameMode } from '../entities/Game';
-import * as XLSX from 'xlsx';
+// Use require for xlsx to avoid ESM/CJS compatibility issues
+const XLSX = require('xlsx');
 import multer from 'multer';
 import * as path from 'path';
 import * as fs from 'fs';
