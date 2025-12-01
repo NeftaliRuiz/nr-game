@@ -632,10 +632,21 @@ export class GameKahootHostComponent implements OnInit, OnDestroy {
 
   showFinalResults(): void {
     this.gamePhase = 'final-results';
-    this.loadLeaderboard();
     
-    // Notify all players
-    this.websocketService.endGame(this.roomCode, this.leaderboard);
+    // Load leaderboard first, then notify players
+    this.gameService.getKahootLeaderboard(this.roomCode).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.leaderboard = response.data.leaderboard;
+          
+          // Notify all players with the loaded leaderboard
+          this.websocketService.endGame(this.roomCode, this.leaderboard);
+        }
+      },
+      error: (err) => {
+        console.error('Error loading final leaderboard:', err);
+      }
+    });
     
     // Update saved game status to finished
     this.updateSavedGameStatus(this.gameId, 'finished', this.participants.length);
@@ -720,8 +731,18 @@ export class GameKahootHostComponent implements OnInit, OnDestroy {
     return Math.round((this.answeredCount / this.participants.length) * 100);
   }
 
-  getLeaderboard(): Participant[] {
-    // Merge leaderboard data with participants
+  getLeaderboard(): any[] {
+    // Use API leaderboard if available (has accurate scores)
+    if (this.leaderboard && this.leaderboard.length > 0) {
+      return this.leaderboard.map(entry => ({
+        ...entry,
+        name: entry.userName || 'Jugador',
+        score: entry.score || 0,
+        correctAnswers: entry.correctAnswers || 0
+      }));
+    }
+    
+    // Fallback to participants (may not have updated scores)
     const sorted = [...this.participants].sort((a, b) => (b.score || 0) - (a.score || 0));
     return sorted.map(p => ({
       ...p,

@@ -170,14 +170,18 @@
             <input 
               type="range" 
               [(ngModel)]="questionCount" 
-              min="5" 
-              max="30" 
-              step="5"
+              min="1" 
+              max="50" 
+              step="1"
               class="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-500">
-            <span class="w-16 text-center bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-white font-semibold">
-              {{ questionCount }}
-            </span>
+            <input 
+              type="number"
+              [(ngModel)]="questionCount"
+              min="1"
+              max="100"
+              class="w-20 text-center bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-white font-semibold">
           </div>
+          <p class="text-xs text-slate-500 mt-1">Si hay menos preguntas en el evento, se usarán las disponibles</p>
         </div>
 
         <!-- Time per Question -->
@@ -187,13 +191,17 @@
             <input 
               type="range" 
               [(ngModel)]="timePerQuestion" 
-              min="10" 
-              max="60" 
+              min="5" 
+              max="120" 
               step="5"
               class="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-500">
-            <span class="w-16 text-center bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-white font-semibold">
-              {{ timePerQuestion }}s
-            </span>
+            <input 
+              type="number"
+              [(ngModel)]="timePerQuestion"
+              min="5"
+              max="300"
+              class="w-20 text-center bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-white font-semibold">
+            <span class="text-slate-400">seg</span>
           </div>
         </div>
 
@@ -404,7 +412,7 @@
     <div class="flex items-center justify-between mb-6">
       <div class="flex items-center gap-4">
         <span class="bg-purple-500/20 text-purple-300 px-4 py-2 rounded-lg font-medium">
-          Pregunta {{ currentQuestionIndex + 1 }} de {{ totalQuestions }}
+          Pregunta {{ questionNumber }} de {{ totalQuestions }}
         </span>
         <span class="bg-slate-700/50 text-slate-300 px-4 py-2 rounded-lg">
           {{ currentQuestion?.category || 'General' }}
@@ -500,7 +508,7 @@
     <!-- Header -->
     <div class="text-center mb-8">
       <span class="bg-purple-500/20 text-purple-300 px-4 py-2 rounded-lg font-medium">
-        Pregunta {{ currentQuestionIndex + 1 }} de {{ totalQuestions }}
+        Pregunta {{ questionNumber }} de {{ totalQuestions }}
       </span>
     </div>
 
@@ -563,7 +571,7 @@
       <button 
         (click)="nextQuestion()"
         class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-4 px-12 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-200 text-xl flex items-center gap-3 mx-auto">
-        <span>{{ currentQuestionIndex + 1 < totalQuestions ? 'Siguiente Pregunta' : 'Ver Resultados' }}</span>
+        <span>{{ questionNumber < totalQuestions ? 'Siguiente Pregunta' : 'Ver Resultados' }}</span>
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
         </svg>
