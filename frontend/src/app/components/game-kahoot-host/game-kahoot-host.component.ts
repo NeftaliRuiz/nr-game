@@ -315,11 +315,21 @@ export class GameKahootHostComponent implements OnInit, OnDestroy {
 
     const finishCreation = () => {
       this.gameService.createKahootGame(createData).subscribe({
-        next: (response) => {
+        next: (response: any) => {
           if (response.success) {
             this.gameId = response.data.game.id;
             this.roomCode = response.data.game.roomCode || '';
-            this.totalQuestions = this.questionCount;
+            
+            // Use the actual available questions count from server
+            this.totalQuestions = response.data.game.totalQuestions;
+            
+            // Show warning if less questions than requested
+            const available = response.data.game.availableQuestions;
+            const requested = response.data.game.requestedQuestions;
+            if (available < requested) {
+              this.successMessage = `⚠️ Solo hay ${available} preguntas disponibles (solicitaste ${requested})`;
+              setTimeout(() => this.successMessage = '', 5000);
+            }
             
             // Update join URL
             this.joinUrl = `${window.location.origin}/game/kahoot/join/${this.roomCode}`;
@@ -328,7 +338,8 @@ export class GameKahootHostComponent implements OnInit, OnDestroy {
             localStorage.setItem('kahoot_host_game', JSON.stringify({
               gameId: this.gameId,
               roomCode: this.roomCode,
-              gameName: this.gameName
+              gameName: this.gameName,
+              totalQuestions: this.totalQuestions
             }));
             
             // Add to saved games history

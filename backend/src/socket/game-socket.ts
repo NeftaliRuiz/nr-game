@@ -198,13 +198,15 @@ export function initializeGameSocket(httpServer: HTTPServer): SocketIOServer {
       const participant = socketToParticipant.get(socket.id);
       if (!participant) return;
 
-      console.log(`✍️ ${participant.userName} submitted answer for question ${questionId}`);
+      console.log(`✍️ ${participant.userName} submitted answer ${selectedAnswer} for question ${questionId}`);
 
-      // Broadcast to all participants (excluding sender)
-      socket.to(gameId).emit('answer-submitted', {
+      // Broadcast to ALL participants INCLUDING HOST (use gameNamespace.to instead of socket.to)
+      // This ensures the host sees the answer distribution update
+      gameNamespace.to(gameId).emit('answer-submitted', {
         participantId,
         userName: participant.userName,
         questionId,
+        selectedAnswer, // Include which answer was selected for distribution tracking
         timestamp: new Date().toISOString(),
       });
     });

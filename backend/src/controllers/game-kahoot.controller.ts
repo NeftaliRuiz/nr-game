@@ -35,6 +35,25 @@ function generateRoomCode(): string {
 }
 
 /**
+ * Helper: Count available questions for a game/event
+ */
+async function countAvailableQuestions(eventId: string | null): Promise<number> {
+  const questionRepository = AppDataSource.getRepository(Question);
+  const queryBuilder = questionRepository.createQueryBuilder('question');
+  
+  if (eventId) {
+    queryBuilder.where('question.eventId = :eventId', { eventId });
+  }
+  
+  // Filter by game mode (KAHOOT only) - but allow NULL for backward compatibility
+  queryBuilder.andWhere('(question.gameMode = :mode OR question.gameMode IS NULL)', { 
+    mode: GameMode.KAHOOT 
+  });
+  
+  return await queryBuilder.getCount();
+}
+
+/**
  * Create a new Kahoot game session (Team-based)
  * POST /api/game/kahoot/create
  */
@@ -81,6 +100,12 @@ export async function createKahootGame(req: Request, res: Response): Promise<voi
       return;
     }
 
+    // Count available questions for this event
+    const availableQuestions = await countAvailableQuestions(eventId || null);
+    
+    // Use the minimum between requested and available questions
+    const effectiveTotalQuestions = Math.min(totalQuestions || 10, availableQuestions);
+    
     // Create game
     const game = gameRepository.create({
       roomCode: roomCode!,
@@ -89,7 +114,7 @@ export async function createKahootGame(req: Request, res: Response): Promise<voi
       status: GameStatus.WAITING,
       eventId: eventId || null,
       usedQuestionIds: [],
-      totalQuestions: totalQuestions || 10,
+      totalQuestions: effectiveTotalQuestions,
     });
 
     await gameRepository.save(game);
@@ -104,9 +129,13 @@ export async function createKahootGame(req: Request, res: Response): Promise<voi
           mode: game.mode,
           status: game.status,
           totalQuestions: game.totalQuestions,
+          availableQuestions: availableQuestions,
+          requestedQuestions: totalQuestions || 10,
         },
       },
-      message: 'Kahoot game created successfully',
+      message: availableQuestions < (totalQuestions || 10) 
+        ? `Juego creado con ${effectiveTotalQuestions} preguntas (solo hay ${availableQuestions} disponibles)`
+        : 'Kahoot game created successfully',
     });
   } catch (error) {
     console.error('Create Kahoot game error:', error);
@@ -290,33 +319,9 @@ async function getRandomQuestion(game: Game, questionRepository: any, gameReposi
   let questions = await queryBuilder.getMany();
   console.log(`   Found ${questions.length} questions in database`);
   
-  // If no questions in DB, use fallback JSON
-  if (questions.length === 0 && fallbackQuestions.length > 0) {
-    console.log(`   Using fallback questions from JSON (${fallbackQuestions.length} available)`);
-    
-    // Filter out used questions from fallback
-    const usedIds = game.usedQuestionIds || [];
-    const availableFallback = fallbackQuestions.filter(q => !usedIds.includes(q.id));
-    
-    if (availableFallback.length === 0) {
-      console.log(`   No more fallback questions available`);
-      return null;
-    }
-    
-    // Pick random from fallback
-    const randomIndex = Math.floor(Math.random() * availableFallback.length);
-    const selectedQuestion = availableFallback[randomIndex];
-    
-    // Add to used questions
-    game.usedQuestionIds = [...usedIds, selectedQuestion.id];
-    await gameRepository.save(game);
-    
-    console.log(`   Selected fallback question: ${selectedQuestion.id}`);
-    return selectedQuestion;
-  }
-  
+  // No fallback - only use questions from the event/database
   if (questions.length === 0) {
-    console.log(`   No questions available at all!`);
+    console.log(`   No questions available - game will end`);
     return null;
   }
 
