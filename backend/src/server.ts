@@ -21,13 +21,21 @@ const app = express();
 const httpServer = createServer(app);
 const PORT = process.env.PORT || 3001;
 
-// CORS configuration for local network
-app.use(cors({
-  origin: true, // Allow all origins in development
+const allowedOrigins = (process.env.CORS_ORIGINS || '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter((origin) => Boolean(origin));
+
+// CORS configuration (allows specific origins in production, any origin locally)
+const corsOptions = {
+  origin: allowedOrigins.length > 0 ? allowedOrigins : true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 app.use(express.json());
 
