@@ -180,6 +180,13 @@ export class GameService {
   }
 
   /**
+   * Join Kahoot game as guest (no login required)
+   */
+  joinKahootGameAsGuest(gameId: string, data: { userName: string; guestId: string }): Observable<JoinGameResponse> {
+    return this.http.post<JoinGameResponse>(`${this.API_URL}/kahoot/${gameId}/join-guest`, data);
+  }
+
+  /**
    * Start Kahoot game (admin only)
    */
   startKahootGame(gameId: string): Observable<StartGameResponse> {

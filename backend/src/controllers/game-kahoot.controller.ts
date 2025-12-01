@@ -510,18 +510,27 @@ export async function getKahootLeaderboard(req: Request, res: Response): Promise
       order: { score: 'DESC' },
     });
 
-    const leaderboard = participants.map((p, index) => ({
-      rank: index + 1,
-      participantId: p.id,
-      userId: p.userId,
-      userName: p.user?.name || 'Unknown',
-      teamId: p.teamId,
-      teamName: p.team?.name || null,
-      score: p.score,
-      correctAnswers: p.correctAnswers,
-      wrongAnswers: p.totalAnswers - p.correctAnswers,
-      streak: p.streak,
-    }));
+    const leaderboard = participants.map((p, index) => {
+      // Extract userName from guestIdentifier if available
+      let userName = p.user?.name || 'Unknown';
+      if (!p.user && p.guestIdentifier) {
+        const parts = p.guestIdentifier.split('___');
+        userName = parts[0] || 'Jugador';
+      }
+      
+      return {
+        rank: index + 1,
+        participantId: p.id,
+        oderId: p.userId,
+        userName: userName,
+        teamId: p.teamId,
+        teamName: p.team?.name || null,
+        score: p.score,
+        correctAnswers: p.correctAnswers,
+        wrongAnswers: p.totalAnswers - p.correctAnswers,
+        streak: p.streak,
+      };
+    });
 
     res.json({
       success: true,
@@ -585,7 +594,7 @@ export async function getKahootGame(req: Request, res: Response): Promise<void> 
         participants: participants.length,
         participantsList: participants.map(p => ({
           id: p.id,
-          userName: p.user?.name,
+          userName: p.user?.name || p.guestIdentifier?.split('_')[0] || 'Jugador',
           teamName: p.team?.name,
           score: p.score,
         })),
@@ -596,6 +605,100 @@ export async function getKahootGame(req: Request, res: Response): Promise<void> 
     res.status(500).json({
       success: false,
       message: 'Failed to get game',
+    });
+  }
+}
+
+/**
+ * Join Kahoot game as guest (no login required)
+ * POST /api/game/kahoot/:gameId/join-guest
+ */
+export async function joinKahootGameAsGuest(req: Request, res: Response): Promise<void> {
+  try {
+    const gameRepository = AppDataSource.getRepository(Game);
+    const participantRepository = AppDataSource.getRepository(GameParticipant);
+    
+    const { gameId } = req.params;
+    const { userName, guestId } = req.body;
+
+    if (!userName || !guestId) {
+      res.status(400).json({
+        success: false,
+        message: 'userName and guestId are required',
+      });
+      return;
+    }
+
+    const game = await gameRepository.findOne({ 
+      where: { roomCode: gameId.toUpperCase() } 
+    });
+    if (!game) {
+      res.status(404).json({
+        success: false,
+        message: 'Game not found',
+      });
+      return;
+    }
+
+    if (game.status !== GameStatus.WAITING) {
+      res.status(400).json({
+        success: false,
+        message: 'Game has already started',
+      });
+      return;
+    }
+
+    // Check if guest already joined
+    const existingParticipant = await participantRepository.findOne({
+      where: { gameId: game.id, guestIdentifier: guestId },
+    });
+
+    if (existingParticipant) {
+      // Return existing participant (reconnection)
+      res.json({
+        success: true,
+        data: {
+          participant: {
+            id: existingParticipant.id,
+            guestId: existingParticipant.guestIdentifier,
+            userName: userName,
+            score: existingParticipant.score,
+          },
+        },
+        message: 'Reconnected to game',
+      });
+      return;
+    }
+
+    // Create guest participant (store userName in guestIdentifier field as prefix)
+    const participant = participantRepository.create({
+      guestIdentifier: `${userName}___${guestId}`,
+      gameId: game.id,
+      score: 0,
+      correctAnswers: 0,
+      totalAnswers: 0,
+      streak: 0,
+    });
+
+    await participantRepository.save(participant);
+
+    res.json({
+      success: true,
+      data: {
+        participant: {
+          id: participant.id,
+          guestId: guestId,
+          userName: userName,
+          score: participant.score,
+        },
+      },
+      message: 'Joined game as guest successfully',
+    });
+  } catch (error) {
+    console.error('Join Kahoot game as guest error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to join game',
     });
   }
 }

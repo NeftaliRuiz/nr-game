@@ -1,0 +1,242 @@
+{
+  "categories": [
+    {
+      "id": "cultura_general",
+      "name": "Cultura General",
+      "icon": "🌍",
+      "color": "#3B82F6"
+    },
+    {
+      "id": "ciencia",
+      "name": "Ciencia",
+      "icon": "🔬",
+      "color": "#10B981"
+    },
+    {
+      "id": "historia",
+      "name": "Historia",
+      "icon": "📜",
+      "color": "#F59E0B"
+    },
+    {
+      "id": "geografia",
+      "name": "Geografía",
+      "icon": "🗺️",
+      "color": "#8B5CF6"
+    },
+    {
+      "id": "deportes",
+      "name": "Deportes",
+      "icon": "⚽",
+      "color": "#EF4444"
+    },
+    {
+      "id": "entretenimiento",
+      "name": "Entretenimiento",
+      "icon": "🎬",
+      "color": "#EC4899"
+    }
+  ],
+  "questions": [
+    {
+      "id": "kg001",
+      "category": "cultura_general",
+      "difficulty": "facil",
+      "points": 100,
+      "question": "¿Cuál es el planeta más grande del sistema solar?",
+      "options": ["Saturno", "Júpiter", "Urano", "Neptuno"],
+      "correctAnswer": 1,
+      "timeLimit": 20
+    },
+    {
+      "id": "kg002",
+      "category": "cultura_general",
+      "difficulty": "facil",
+      "points": 100,
+      "question": "¿Cuántos continentes hay en el mundo?",
+      "options": ["5", "6", "7", "8"],
+      "correctAnswer": 2,
+      "timeLimit": 15
+    },
+    {
+      "id": "kg003",
+      "category": "cultura_general",
+      "difficulty": "medio",
+      "points": 150,
+      "question": "¿En qué año llegó el hombre a la Luna por primera vez?",
+      "options": ["1965", "1969", "1972", "1967"],
+      "correctAnswer": 1,
+      "timeLimit": 20
+    },
+    {
+      "id": "kg004",
+      "category": "ciencia",
+      "difficulty": "facil",
+      "points": 100,
+      "question": "¿Cuál es el símbolo químico del oro?",
+      "options": ["Ag", "Au", "Fe", "Cu"],
+      "correctAnswer": 1,
+      "timeLimit": 15
+    },
+    {
+      "id": "kg005",
+      "category": "ciencia",
+      "difficulty": "medio",
+      "points": 150,
+      "question": "¿Cuántos huesos tiene el cuerpo humano adulto?",
+      "options": ["196", "206", "216", "226"],
+      "correctAnswer": 1,
+      "timeLimit": 20
+    },
+    {
+      "id": "kg006",
+      "category": "ciencia",
+      "difficulty": "dificil",
+      "points": 200,
+      "question": "¿Cuál es la velocidad de la luz en el vacío?",
+      "options": ["299,792 km/s", "199,792 km/s", "399,792 km/s", "249,792 km/s"],
+      "correctAnswer": 0,
+      "timeLimit": 25
+    },
+    {
+      "id": "kg007",
+      "category": "historia",
+      "difficulty": "facil",
+      "points": 100,
+      "question": "¿En qué año comenzó la Segunda Guerra Mundial?",
+      "options": ["1935", "1939", "1941", "1937"],
+      "correctAnswer": 1,
+      "timeLimit": 15
+    },
+    {
+      "id": "kg008",
+      "category": "historia",
+      "difficulty": "medio",
+      "points": 150,
+      "question": "¿Quién fue el primer presidente de Estados Unidos?",
+      "options": ["Thomas Jefferson", "John Adams", "George Washington", "Benjamin Franklin"],
+      "correctAnswer": 2,
+      "timeLimit": 20
+    },
+    {
+      "id": "kg009",
+      "category": "historia",
+      "difficulty": "dificil",
+      "points": 200,
+      "question": "¿En qué año cayó el Imperio Romano de Occidente?",
+      "options": ["376 d.C.", "410 d.C.", "476 d.C.", "527 d.C."],
+      "correctAnswer": 2,
+      "timeLimit": 25
+    },
+    {
+      "id": "kg010",
+      "category": "geografia",
+      "difficulty": "facil",
+      "points": 100,
+      "question": "¿Cuál es el río más largo del mundo?",
+      "options": ["Amazonas", "Nilo", "Yangtsé", "Misisipi"],
+      "correctAnswer": 0,
+      "timeLimit": 15
+    },
+    {
+      "id": "kg011",
+      "category": "geografia",
+      "difficulty": "medio",
+      "points": 150,
+      "question": "¿Cuál es la capital de Australia?",
+      "options": ["Sídney", "Melbourne", "Canberra", "Brisbane"],
+      "correctAnswer": 2,
+      "timeLimit": 20
+    },
+    {
+      "id": "kg012",
+      "category": "geografia",
+      "difficulty": "dificil",
+      "points": 200,
+      "question": "¿Cuál es el país más pequeño del mundo?",
+      "options": ["Mónaco", "San Marino", "Vaticano", "Liechtenstein"],
+      "correctAnswer": 2,
+      "timeLimit": 20
+    },
+    {
+      "id": "kg013",
+      "category": "deportes",
+      "difficulty": "facil",
+      "points": 100,
+      "question": "¿Cada cuántos años se celebran los Juegos Olímpicos de verano?",
+      "options": ["2 años", "3 años", "4 años", "5 años"],
+      "correctAnswer": 2,
+      "timeLimit": 15
+    },
+    {
+      "id": "kg014",
+      "category": "deportes",
+      "difficulty": "medio",
+      "points": 150,
+      "question": "¿En qué país se inventó el fútbol moderno?",
+      "options": ["Brasil", "España", "Inglaterra", "Italia"],
+      "correctAnswer": 2,
+      "timeLimit": 20
+    },
+    {
+      "id": "kg015",
+      "category": "deportes",
+      "difficulty": "dificil",
+      "points": 200,
+      "question": "¿Quién ganó el primer Mundial de Fútbol en 1930?",
+      "options": ["Brasil", "Argentina", "Uruguay", "Italia"],
+      "correctAnswer": 2,
+      "timeLimit": 25
+    },
+    {
+      "id": "kg016",
+      "category": "entretenimiento",
+      "difficulty": "facil",
+      "points": 100,
+      "question": "¿Cuántos anillos del poder forjaron los elfos en 'El Señor de los Anillos'?",
+      "options": ["3", "7", "9", "1"],
+      "correctAnswer": 0,
+      "timeLimit": 20
+    },
+    {
+      "id": "kg017",
+      "category": "entretenimiento",
+      "difficulty": "medio",
+      "points": 150,
+      "question": "¿En qué año se estrenó la primera película de Harry Potter?",
+      "options": ["1999", "2000", "2001", "2002"],
+      "correctAnswer": 2,
+      "timeLimit": 20
+    },
+    {
+      "id": "kg018",
+      "category": "entretenimiento",
+      "difficulty": "dificil",
+      "points": 200,
+      "question": "¿Quién dirigió la película 'Inception' (El Origen)?",
+      "options": ["Steven Spielberg", "Christopher Nolan", "James Cameron", "Ridley Scott"],
+      "correctAnswer": 1,
+      "timeLimit": 20
+    },
+    {
+      "id": "kg019",
+      "category": "ciencia",
+      "difficulty": "facil",
+      "points": 100,
+      "question": "¿Cuál es el gas más abundante en la atmósfera terrestre?",
+      "options": ["Oxígeno", "Dióxido de carbono", "Nitrógeno", "Argón"],
+      "correctAnswer": 2,
+      "timeLimit": 15
+    },
+    {
+      "id": "kg020",
+      "category": "cultura_general",
+      "difficulty": "medio",
+      "points": 150,
+      "question": "¿Cuántas teclas tiene un piano estándar?",
+      "options": ["76", "82", "88", "92"],
+      "correctAnswer": 2,
+      "timeLimit": 20
+    }
+  ]
+}

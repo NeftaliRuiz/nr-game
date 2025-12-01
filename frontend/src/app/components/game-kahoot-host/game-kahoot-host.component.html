@@ -1,0 +1,422 @@
+<div class="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900">
+  
+  <!-- ==================== SETUP PHASE ==================== -->
+  <div *ngIf="gamePhase === 'setup'" class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full">
+      <div class="text-center mb-8">
+        <div class="text-6xl mb-4">🎮</div>
+        <h1 class="text-3xl font-bold text-gray-800">Crear Juego Kahoot</h1>
+        <p class="text-gray-500 mt-2">Configura tu trivia interactiva</p>
+      </div>
+
+      <div class="space-y-6">
+        <!-- Game Name -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Nombre del Juego</label>
+          <input 
+            type="text" 
+            [(ngModel)]="gameName"
+            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition-colors"
+            placeholder="Ej: Trivia de Ciencias"
+          />
+        </div>
+
+        <!-- Number of Questions -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Número de Preguntas</label>
+          <select 
+            [(ngModel)]="totalQuestions"
+            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition-colors"
+          >
+            <option [value]="5">5 preguntas</option>
+            <option [value]="10">10 preguntas</option>
+            <option [value]="15">15 preguntas</option>
+            <option [value]="20">20 preguntas</option>
+          </select>
+        </div>
+
+        <!-- Create Button -->
+        <button 
+          (click)="createGame()"
+          [disabled]="isLoading || !gameName.trim()"
+          class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+        >
+          {{ isLoading ? '⏳ Creando...' : '🚀 Crear Juego' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== LOBBY PHASE ==================== -->
+  <div *ngIf="gamePhase === 'lobby'" class="min-h-screen p-6">
+    <!-- Header -->
+    <div class="max-w-6xl mx-auto">
+      <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="text-center md:text-left">
+            <h1 class="text-2xl font-bold text-gray-800">{{ gameName }}</h1>
+            <p class="text-gray-500">Esperando jugadores...</p>
+          </div>
+          
+          <!-- Room Code Display -->
+          <div class="text-center bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-8 py-4 rounded-2xl">
+            <p class="text-sm font-medium opacity-80">Código PIN</p>
+            <p class="text-5xl font-black tracking-wider">{{ roomCode }}</p>
+          </div>
+          
+          <div class="flex gap-2">
+            <button 
+              (click)="copyRoomCode()"
+              class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg transition-colors"
+            >
+              📋 Copiar
+            </button>
+            <button 
+              (click)="toggleQRCode()"
+              class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg transition-colors"
+            >
+              {{ showQRCode ? '❌ Ocultar QR' : '📱 Mostrar QR' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- QR Code -->
+        <div *ngIf="showQRCode" class="mt-6 flex justify-center">
+          <div class="bg-white p-4 rounded-xl shadow-lg">
+            <qrcode 
+              [qrdata]="getJoinUrl()" 
+              [width]="200" 
+              [errorCorrectionLevel]="'M'"
+            ></qrcode>
+            <p class="text-xs text-gray-500 text-center mt-2">Escanea para unirte</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Join Instructions -->
+      <div class="bg-gradient-to-r from-yellow-400 to-orange-400 rounded-2xl p-6 mb-6 text-center">
+        <p class="text-2xl font-bold text-white mb-2">¡Únete en tu dispositivo!</p>
+        <p class="text-white text-lg">
+          Visita <span class="font-mono bg-white/20 px-2 py-1 rounded">{{ getJoinUrl() }}</span>
+        </p>
+        <p class="text-white/80 mt-2">o ingresa el código <span class="font-bold">{{ roomCode }}</span></p>
+      </div>
+
+      <!-- Participants Grid -->
+      <div class="bg-white rounded-2xl shadow-xl p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">
+          Jugadores Conectados ({{ participants.length }})
+        </h2>
+        
+        <div *ngIf="participants.length === 0" class="text-center py-12">
+          <div class="text-6xl mb-4 animate-bounce">👥</div>
+          <p class="text-gray-500 text-lg">Esperando jugadores...</p>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <div 
+            *ngFor="let participant of participants; let i = index"
+            class="bg-gradient-to-br from-purple-500 to-indigo-500 rounded-xl p-4 text-center text-white transform hover:scale-105 transition-transform animate-fade-in"
+            [style.animation-delay.ms]="i * 100"
+          >
+            <div class="text-3xl mb-2">{{ ['😎','🤓','🧐','😊','🤩','😁','🥳','🤗'][i % 8] }}</div>
+            <p class="font-semibold truncate">{{ participant.userName }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Start Game Button -->
+      <div class="mt-6 text-center">
+        <button 
+          (click)="startGame()"
+          [disabled]="isLoading || participants.length < 1"
+          class="bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold text-xl py-4 px-12 rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
+        >
+          {{ isLoading ? '⏳ Iniciando...' : '🎯 Iniciar Juego' }}
+        </button>
+        <p *ngIf="participants.length < 1" class="text-white/70 mt-2">
+          Se necesita al menos 1 jugador
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== COUNTDOWN PHASE ==================== -->
+  <div *ngIf="gamePhase === 'countdown'" class="flex items-center justify-center min-h-screen">
+    <div class="text-center">
+      <div class="text-[200px] font-black text-white animate-pulse">
+        {{ countdownValue }}
+      </div>
+      <p class="text-3xl text-white/80">¡Prepárense!</p>
+    </div>
+  </div>
+
+  <!-- ==================== QUESTION PHASE ==================== -->
+  <div *ngIf="gamePhase === 'question'" class="min-h-screen p-4">
+    <div class="max-w-6xl mx-auto">
+      <!-- Top Bar -->
+      <div class="flex items-center justify-between mb-4">
+        <div class="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2 text-white">
+          <span class="font-semibold">Pregunta {{ questionNumber }} / {{ totalQuestions }}</span>
+        </div>
+        
+        <!-- Timer Circle -->
+        <div class="relative w-20 h-20">
+          <svg class="transform -rotate-90 w-20 h-20">
+            <circle 
+              cx="40" cy="40" r="35" 
+              stroke="rgba(255,255,255,0.3)" 
+              stroke-width="6" 
+              fill="transparent"
+            />
+            <circle 
+              cx="40" cy="40" r="35" 
+              [attr.stroke]="getTimerColor()" 
+              stroke-width="6" 
+              fill="transparent"
+              [style.stroke-dasharray]="220"
+              [style.stroke-dashoffset]="220 * (1 - timerProgress / 100)"
+              class="transition-all duration-1000"
+            />
+          </svg>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <span class="text-2xl font-bold text-white">{{ timeRemaining }}</span>
+          </div>
+        </div>
+        
+        <div class="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2 text-white">
+          <span class="font-semibold">{{ answersReceived }} / {{ participants.length }} respuestas</span>
+        </div>
+      </div>
+
+      <!-- Question Card -->
+      <div class="bg-white rounded-2xl shadow-2xl p-8 mb-6" *ngIf="currentQuestion">
+        <!-- Category & Difficulty -->
+        <div class="flex items-center justify-center gap-4 mb-6">
+          <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">
+            {{ currentQuestion.category }}
+          </span>
+          <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-semibold">
+            {{ currentQuestion.difficulty }}
+          </span>
+          <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
+            {{ currentQuestion.points }} pts
+          </span>
+        </div>
+        
+        <!-- Question Text -->
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-800 text-center leading-tight">
+          {{ currentQuestion.question }}
+        </h2>
+      </div>
+
+      <!-- Options Grid -->
+      <div class="grid grid-cols-2 gap-4" *ngIf="currentQuestion">
+        <div 
+          *ngFor="let option of currentQuestion.options; let i = index"
+          [class]="optionColors[i].bg + ' rounded-2xl p-6 text-white shadow-lg transform hover:scale-102 transition-transform'"
+        >
+          <div class="flex items-center gap-4">
+            <span class="text-4xl">{{ optionColors[i].icon }}</span>
+            <span class="text-xl md:text-2xl font-semibold flex-1">{{ option }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Skip Button -->
+      <div class="mt-6 text-center">
+        <button 
+          (click)="showAnswerReveal()"
+          class="bg-white/20 backdrop-blur-sm text-white px-6 py-2 rounded-lg hover:bg-white/30 transition-colors"
+        >
+          ⏭️ Mostrar Respuesta
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== ANSWER REVEAL PHASE ==================== -->
+  <div *ngIf="gamePhase === 'answer-reveal'" class="min-h-screen p-4">
+    <div class="max-w-6xl mx-auto">
+      <!-- Question Recap -->
+      <div class="bg-white rounded-2xl shadow-xl p-6 mb-6" *ngIf="currentQuestion">
+        <h2 class="text-2xl font-bold text-gray-800 text-center mb-4">
+          {{ currentQuestion.question }}
+        </h2>
+        
+        <!-- Options with Results -->
+        <div class="grid grid-cols-2 gap-4">
+          <div 
+            *ngFor="let option of currentQuestion.options; let i = index"
+            [class]="'rounded-xl p-4 transition-all ' + 
+              (i === currentQuestion.correctAnswer 
+                ? 'bg-green-500 text-white ring-4 ring-green-300 transform scale-105' 
+                : 'bg-gray-200 text-gray-700')"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="text-2xl">{{ optionColors[i].icon }}</span>
+                <span class="font-semibold">{{ option }}</span>
+              </div>
+              <div class="text-right">
+                <div class="font-bold text-lg">{{ answerDistribution[i] }}</div>
+                <div class="text-sm opacity-80">{{ getAnswerPercentage(i) }}%</div>
+              </div>
+            </div>
+            <!-- Progress Bar -->
+            <div class="mt-2 bg-black/20 rounded-full h-2">
+              <div 
+                class="bg-white/50 h-2 rounded-full transition-all duration-500"
+                [style.width.%]="getAnswerPercentage(i)"
+              ></div>
+            </div>
+            <!-- Correct Answer Indicator -->
+            <div *ngIf="i === currentQuestion.correctAnswer" class="mt-2 text-center">
+              <span class="text-2xl">✅ Respuesta Correcta</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <div class="text-center">
+        <button 
+          (click)="showLeaderboard()"
+          class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-xl py-4 px-12 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-lg"
+        >
+          🏆 Ver Clasificación
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== LEADERBOARD PHASE ==================== -->
+  <div *ngIf="gamePhase === 'leaderboard'" class="min-h-screen p-4">
+    <div class="max-w-4xl mx-auto">
+      <div class="bg-white rounded-2xl shadow-2xl p-8">
+        <h2 class="text-4xl font-bold text-center text-gray-800 mb-8">🏆 Clasificación</h2>
+        
+        <!-- Top 5 -->
+        <div class="space-y-4">
+          <div 
+            *ngFor="let entry of leaderboard.slice(0, 5); let i = index"
+            class="flex items-center justify-between p-4 rounded-xl transition-all hover:scale-102"
+            [class.bg-yellow-100]="i === 0"
+            [class.bg-gray-100]="i === 1"
+            [class.bg-orange-100]="i === 2"
+            [class.bg-gray-50]="i > 2"
+          >
+            <div class="flex items-center gap-4">
+              <span class="text-4xl font-bold">{{ getRankMedal(entry.rank) }}</span>
+              <span class="text-xl font-semibold text-gray-800">{{ entry.userName }}</span>
+            </div>
+            <div class="text-right">
+              <span class="text-3xl font-bold text-purple-600">{{ entry.score }}</span>
+              <span class="text-gray-500 ml-1">pts</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Button -->
+        <div class="mt-8 text-center">
+          <button 
+            (click)="nextQuestion()"
+            [disabled]="isLoading"
+            class="bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold text-xl py-4 px-12 rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all transform hover:scale-105 shadow-lg disabled:opacity-50"
+          >
+            {{ isLoading ? '⏳ Cargando...' : '➡️ Siguiente Pregunta' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== FINAL RESULTS PHASE ==================== -->
+  <div *ngIf="gamePhase === 'final-results'" class="min-h-screen p-4">
+    <div class="max-w-5xl mx-auto">
+      <!-- Confetti Effect Header -->
+      <div class="text-center mb-8">
+        <div class="text-6xl mb-4">🎉🏆🎉</div>
+        <h1 class="text-5xl font-black text-white mb-2">¡Juego Terminado!</h1>
+        <p class="text-xl text-white/80">{{ gameName }}</p>
+      </div>
+
+      <!-- Podium -->
+      <div *ngIf="leaderboard.length >= 3" class="flex items-end justify-center gap-4 mb-8">
+        <!-- 2nd Place -->
+        <div class="text-center">
+          <div class="bg-gradient-to-b from-gray-300 to-gray-400 rounded-t-xl px-8 py-6 min-h-[150px] flex flex-col justify-end">
+            <div class="text-5xl mb-2">🥈</div>
+            <div class="text-xl font-bold text-white">{{ leaderboard[1].userName }}</div>
+            <div class="text-3xl font-black text-white">{{ leaderboard[1].score }}</div>
+          </div>
+          <div class="bg-gray-400 h-16 rounded-b-xl flex items-center justify-center">
+            <span class="text-3xl font-black text-white">2</span>
+          </div>
+        </div>
+
+        <!-- 1st Place -->
+        <div class="text-center">
+          <div class="bg-gradient-to-b from-yellow-400 to-yellow-500 rounded-t-xl px-10 py-8 min-h-[200px] flex flex-col justify-end shadow-2xl">
+            <div class="text-6xl mb-2">🥇</div>
+            <div class="text-2xl font-bold text-white">{{ leaderboard[0].userName }}</div>
+            <div class="text-4xl font-black text-white">{{ leaderboard[0].score }}</div>
+          </div>
+          <div class="bg-yellow-500 h-20 rounded-b-xl flex items-center justify-center">
+            <span class="text-4xl font-black text-white">1</span>
+          </div>
+        </div>
+
+        <!-- 3rd Place -->
+        <div class="text-center">
+          <div class="bg-gradient-to-b from-orange-400 to-orange-500 rounded-t-xl px-6 py-4 min-h-[120px] flex flex-col justify-end">
+            <div class="text-4xl mb-2">🥉</div>
+            <div class="text-lg font-bold text-white">{{ leaderboard[2].userName }}</div>
+            <div class="text-2xl font-black text-white">{{ leaderboard[2].score }}</div>
+          </div>
+          <div class="bg-orange-500 h-12 rounded-b-xl flex items-center justify-center">
+            <span class="text-2xl font-black text-white">3</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Full Leaderboard -->
+      <div class="bg-white rounded-2xl shadow-2xl p-6">
+        <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center">Clasificación Final</h3>
+        <div class="space-y-3">
+          <div 
+            *ngFor="let entry of leaderboard"
+            class="flex items-center justify-between bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-colors"
+          >
+            <div class="flex items-center gap-4">
+              <span class="text-2xl font-bold w-12">{{ getRankMedal(entry.rank) }}</span>
+              <span class="text-lg font-semibold text-gray-800">{{ entry.userName }}</span>
+            </div>
+            <div class="text-right">
+              <span class="text-2xl font-bold text-purple-600">{{ entry.score }}</span>
+              <div class="text-sm text-gray-500">
+                {{ entry.correctAnswers }} correctas
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="mt-8 flex justify-center gap-4">
+        <button 
+          (click)="newGame()"
+          class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 px-8 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-lg"
+        >
+          🎮 Nuevo Juego
+        </button>
+        <button 
+          (click)="router.navigate(['/'])"
+          class="bg-white text-gray-800 font-bold py-4 px-8 rounded-xl hover:bg-gray-100 transition-all shadow-lg"
+        >
+          🏠 Ir al Inicio
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

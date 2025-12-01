@@ -13,6 +13,8 @@ import { ScoreboardComponent } from './components/scoreboard/scoreboard.componen
 import { TimerComponent } from './components/timer/timer.component';
 import { AdminLoginComponent } from './components/admin-login/admin-login.component';
 import { GameKahootComponent } from './components/game-kahoot/game-kahoot.component';
+import { GameKahootHostComponent } from './components/game-kahoot-host/game-kahoot-host.component';
+import { GameKahootPlayerComponent } from './components/game-kahoot-player/game-kahoot-player.component';
 import { GameGeopartyComponent } from './components/game-geoparty/game-geoparty.component';
 import { GameWordsearchComponent } from './components/game-wordsearch/game-wordsearch.component';
 import { GameJoinComponent } from './components/game-join/game-join.component';
@@ -34,6 +36,8 @@ import { AuthGuard } from './guards/auth.guard';
     AdminLoginComponent,
     GameJoinComponent,
     GameKahootComponent,
+    GameKahootHostComponent,
+    GameKahootPlayerComponent,
     GameGeopartyComponent,
     GameWordsearchComponent
   ],

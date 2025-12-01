@@ -3,6 +3,8 @@ import { RouterModule, Routes } from '@angular/router';
 import { GameBoardComponent } from './components/game-board/game-board.component';
 import { AdminLoginComponent } from './components/admin-login/admin-login.component';
 import { GameKahootComponent } from './components/game-kahoot/game-kahoot.component';
+import { GameKahootHostComponent } from './components/game-kahoot-host/game-kahoot-host.component';
+import { GameKahootPlayerComponent } from './components/game-kahoot-player/game-kahoot-player.component';
 import { GameGeopartyComponent } from './components/game-geoparty/game-geoparty.component';
 import { GameWordsearchComponent } from './components/game-wordsearch/game-wordsearch.component';
 import { AuthGuard } from './guards/auth.guard';
@@ -17,9 +19,14 @@ const routes: Routes = [
   { path: 'join', component: GameJoinComponent }, // JOIN ROUTE
   { path: 'game/join', component: GameJoinComponent }, // ALTERNATIVE JOIN ROUTE
   
-  // Game modes
+  // Kahoot game modes
   { path: 'game/kahoot', component: GameKahootComponent },
+  { path: 'game/kahoot/host', component: GameKahootHostComponent }, // Host/Presenter view
+  { path: 'game/kahoot/play', component: GameKahootPlayerComponent }, // Player join view
+  { path: 'game/kahoot/join/:roomCode', component: GameKahootPlayerComponent }, // Direct join with code
   { path: 'game/kahoot/:gameId', component: GameKahootComponent },
+  
+  // Other game modes
   { path: 'game/geoparty', component: GameGeopartyComponent },
   { path: 'game/geoparty/:gameId', component: GameGeopartyComponent },
   { path: 'game/wordsearch', component: GameWordsearchComponent }, // Create game

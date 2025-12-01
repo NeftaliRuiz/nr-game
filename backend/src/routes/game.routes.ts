@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   createKahootGame,
   joinKahootGame,
+  joinKahootGameAsGuest,
   startKahootGame,
   submitKahootAnswer,
   nextKahootQuestion,
@@ -66,6 +67,14 @@ router.post('/kahoot/create', createKahootGame);
  * @body    { userId: string, teamId: string }
  */
 router.post('/kahoot/:gameId/join', joinKahootGame);
+
+/**
+ * @route   POST /api/game/kahoot/:gameId/join-guest
+ * @desc    Join Kahoot game as guest (no login required)
+ * @access  Public
+ * @body    { userName: string, guestId: string }
+ */
+router.post('/kahoot/:gameId/join-guest', joinKahootGameAsGuest);
 
 /**
  * @route   POST /api/game/kahoot/:gameId/start
