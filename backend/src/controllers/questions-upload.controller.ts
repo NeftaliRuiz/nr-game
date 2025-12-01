@@ -163,6 +163,11 @@ export async function saveQuestionsFromUpload(req: Request, res: Response): Prom
 
     const { eventId, gameMode } = req.body;
     const filePath = req.file.path;
+    
+    console.log(`📤 Uploading questions:`)
+    console.log(`   eventId: ${eventId}`)
+    console.log(`   gameMode: ${gameMode}`)
+    console.log(`   file: ${req.file.originalname}`);
 
     // Validate event if provided
     let event = null;
@@ -233,6 +238,8 @@ export async function saveQuestionsFromUpload(req: Request, res: Response): Prom
           gameMode: gameMode || null
         });
 
+        console.log(`   💾 Saving question: "${parsed.question.substring(0, 40)}..." | eventId: ${eventId} | gameMode: ${gameMode}`);
+        
         const saved = await questionRepository.save(question);
         savedQuestions.push(saved);
       } catch (saveError) {

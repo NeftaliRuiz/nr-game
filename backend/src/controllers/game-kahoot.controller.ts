@@ -50,7 +50,9 @@ async function countAvailableQuestions(eventId: string | null): Promise<number> 
     mode: GameMode.KAHOOT 
   });
   
-  return await queryBuilder.getCount();
+  const count = await queryBuilder.getCount();
+  console.log(`📊 countAvailableQuestions: eventId=${eventId}, found=${count}`);
+  return count;
 }
 
 /**
@@ -293,21 +295,25 @@ export async function startKahootGame(req: Request, res: Response): Promise<void
  */
 async function getRandomQuestion(game: Game, questionRepository: any, gameRepository: any): Promise<any> {
   console.log(`🔍 Getting random question for game ${game.roomCode}`);
+  console.log(`   Game eventId: ${game.eventId}`);
   console.log(`   Used questions: ${game.usedQuestionIds?.length || 0}`);
   
   // First, try to get from database
   const queryBuilder = questionRepository.createQueryBuilder('question');
 
-  // Filter by event if specified, otherwise get ALL questions (not just eventId IS NULL)
+  // Filter by event if specified
   if (game.eventId) {
     queryBuilder.where('question.eventId = :eventId', { eventId: game.eventId });
+    console.log(`   Filtering by eventId: ${game.eventId}`);
+  } else {
+    console.log(`   ⚠️ No eventId - this game has no event associated!`);
   }
-  // Removed: queryBuilder.where('question.eventId IS NULL') - too restrictive
 
   // Filter by game mode (KAHOOT only) - but allow NULL for backward compatibility
   queryBuilder.andWhere('(question.gameMode = :mode OR question.gameMode IS NULL)', { 
     mode: GameMode.KAHOOT 
   });
+  console.log(`   Filtering by gameMode: ${GameMode.KAHOOT} or NULL`);
 
   // Exclude already used questions
   if (game.usedQuestionIds && game.usedQuestionIds.length > 0) {
@@ -316,8 +322,15 @@ async function getRandomQuestion(game: Game, questionRepository: any, gameReposi
     });
   }
 
+  // Log the SQL query for debugging
+  console.log(`   SQL: ${queryBuilder.getSql()}`);
+
   let questions = await queryBuilder.getMany();
   console.log(`   Found ${questions.length} questions in database`);
+  
+  if (questions.length > 0) {
+    console.log(`   Sample question: ${questions[0].id} - ${questions[0].question?.substring(0, 50)}...`);
+  }
   
   // No fallback - only use questions from the event/database
   if (questions.length === 0) {
