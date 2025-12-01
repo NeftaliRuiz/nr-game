@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import express, { Request, Response } from 'express';
 import { createServer } from 'http';
-import cors from 'cors';
+import cors, { CorsOptions } from 'cors';
 import dotenv from 'dotenv';
 import { initializeDatabase } from './config/database';
 import { initializeGameSocket, getActiveGameRooms } from './socket/game-socket';
@@ -23,15 +23,29 @@ const PORT = process.env.PORT || 3001;
 
 const allowedOrigins = (process.env.CORS_ORIGINS || '')
   .split(',')
-  .map((origin) => origin.trim())
+  .map((origin) => origin.trim().replace(/\/$/, ''))
   .filter((origin) => Boolean(origin));
 
-// CORS configuration (allows specific origins in production, any origin locally)
-const corsOptions = {
-  origin: allowedOrigins.length > 0 ? allowedOrigins : true,
+const corsOptions: CorsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    const normalizedOrigin = origin.replace(/\/$/, '');
+
+    if (allowedOrigins.length === 0 || allowedOrigins.includes(normalizedOrigin)) {
+      return callback(null, true);
+    }
+
+    console.warn(`🚫 CORS blocked origin: ${origin}`);
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200,
+  maxAge: 86400,
 };
 
 app.use(cors(corsOptions));
