@@ -7,6 +7,20 @@ import { Team } from '../entities/Team';
 import { Question } from '../entities/Question';
 import { Answer } from '../entities/Answer';
 import { Event } from '../entities/Event';
+import * as fs from 'fs';
+import * as path from 'path';
+
+// Load fallback questions from JSON
+let fallbackQuestions: any[] = [];
+try {
+  const questionsPath = path.join(__dirname, '../data/kahoot-questions.json');
+  const data = fs.readFileSync(questionsPath, 'utf-8');
+  const parsed = JSON.parse(data);
+  fallbackQuestions = parsed.questions || [];
+  console.log(`✅ Loaded ${fallbackQuestions.length} fallback Kahoot questions`);
+} catch (error) {
+  console.warn('⚠️ Could not load fallback questions:', error);
+}
 
 /**
  * Generate a unique 6-character room code
@@ -193,6 +207,7 @@ export async function startKahootGame(req: Request, res: Response): Promise<void
     const questionRepository = AppDataSource.getRepository(Question);
     
     const { gameId } = req.params;
+    console.log(`🎮 Starting Kahoot game: ${gameId}`);
 
     const game = await gameRepository.findOne({
       where: { roomCode: gameId.toUpperCase() },
@@ -200,6 +215,7 @@ export async function startKahootGame(req: Request, res: Response): Promise<void
     });
 
     if (!game) {
+      console.log(`❌ Game not found: ${gameId}`);
       res.status(404).json({
         success: false,
         message: 'Game not found',
@@ -207,12 +223,20 @@ export async function startKahootGame(req: Request, res: Response): Promise<void
       return;
     }
 
+    console.log(`✅ Game found: ${game.id}, eventId: ${game.eventId}`);
+
     game.status = GameStatus.IN_PROGRESS;
     game.startedAt = new Date();
     await gameRepository.save(game);
 
     // Get first random question
     const firstQuestion = await getRandomQuestion(game, questionRepository, gameRepository);
+    
+    console.log(`📝 First question: ${firstQuestion ? firstQuestion.id : 'NONE'}`);
+    
+    if (!firstQuestion) {
+      console.log(`⚠️ No questions available for game ${gameId}`);
+    }
 
     res.json({
       success: true,
@@ -238,17 +262,20 @@ export async function startKahootGame(req: Request, res: Response): Promise<void
 /**
  * Helper: Get random question for game
  */
-async function getRandomQuestion(game: Game, questionRepository: any, gameRepository: any): Promise<Question | null> {
+async function getRandomQuestion(game: Game, questionRepository: any, gameRepository: any): Promise<any> {
+  console.log(`🔍 Getting random question for game ${game.roomCode}`);
+  console.log(`   Used questions: ${game.usedQuestionIds?.length || 0}`);
+  
+  // First, try to get from database
   const queryBuilder = questionRepository.createQueryBuilder('question');
 
-  // Filter by event if specified
+  // Filter by event if specified, otherwise get ALL questions (not just eventId IS NULL)
   if (game.eventId) {
     queryBuilder.where('question.eventId = :eventId', { eventId: game.eventId });
-  } else {
-    queryBuilder.where('question.eventId IS NULL');
   }
+  // Removed: queryBuilder.where('question.eventId IS NULL') - too restrictive
 
-  // Filter by game mode (KAHOOT only)
+  // Filter by game mode (KAHOOT only) - but allow NULL for backward compatibility
   queryBuilder.andWhere('(question.gameMode = :mode OR question.gameMode IS NULL)', { 
     mode: GameMode.KAHOOT 
   });
@@ -260,13 +287,40 @@ async function getRandomQuestion(game: Game, questionRepository: any, gameReposi
     });
   }
 
-  const questions = await queryBuilder.getMany();
+  let questions = await queryBuilder.getMany();
+  console.log(`   Found ${questions.length} questions in database`);
+  
+  // If no questions in DB, use fallback JSON
+  if (questions.length === 0 && fallbackQuestions.length > 0) {
+    console.log(`   Using fallback questions from JSON (${fallbackQuestions.length} available)`);
+    
+    // Filter out used questions from fallback
+    const usedIds = game.usedQuestionIds || [];
+    const availableFallback = fallbackQuestions.filter(q => !usedIds.includes(q.id));
+    
+    if (availableFallback.length === 0) {
+      console.log(`   No more fallback questions available`);
+      return null;
+    }
+    
+    // Pick random from fallback
+    const randomIndex = Math.floor(Math.random() * availableFallback.length);
+    const selectedQuestion = availableFallback[randomIndex];
+    
+    // Add to used questions
+    game.usedQuestionIds = [...usedIds, selectedQuestion.id];
+    await gameRepository.save(game);
+    
+    console.log(`   Selected fallback question: ${selectedQuestion.id}`);
+    return selectedQuestion;
+  }
   
   if (questions.length === 0) {
+    console.log(`   No questions available at all!`);
     return null;
   }
 
-  // Pick random question
+  // Pick random question from database
   const randomIndex = Math.floor(Math.random() * questions.length);
   const selectedQuestion = questions[randomIndex];
 
@@ -274,6 +328,7 @@ async function getRandomQuestion(game: Game, questionRepository: any, gameReposi
   game.usedQuestionIds = [...(game.usedQuestionIds || []), selectedQuestion.id];
   await gameRepository.save(game);
 
+  console.log(`   Selected DB question: ${selectedQuestion.id}`);
   return selectedQuestion;
 }
 

@@ -220,13 +220,17 @@ export class GameKahootHostComponent implements OnInit, OnDestroy {
           // Notify all players
           this.websocketService.startGame(this.roomCode);
           
-          // Start countdown
-          this.startCountdown();
-          
           // Load first question
           if (response.data.currentQuestion) {
             this.currentQuestion = response.data.currentQuestion;
             this.questionNumber = 1;
+            
+            // Start countdown only if we have a question
+            this.startCountdown();
+          } else {
+            console.error('No questions available!');
+            alert('Error: No hay preguntas disponibles. Contacta al administrador.');
+            this.gamePhase = 'lobby';
           }
         }
         this.isLoading = false;
