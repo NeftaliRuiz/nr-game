@@ -257,6 +257,14 @@ export class GameKahootPlayerComponent implements OnInit, OnDestroy {
     this.hasAnswered = true;
     this.gamePhase = 'answered';
     
+    // Set a timeout to show result even if API doesn't respond
+    const timeoutId = setTimeout(() => {
+      if (this.gamePhase === 'answered') {
+        console.log('API timeout - showing result based on WebSocket or default');
+        // If we haven't received result yet, stay in answered but show some feedback
+      }
+    }, 5000);
+    
     // Submit answer via API
     this.gameService.submitKahootAnswer(this.roomCode, {
       participantId: this.participantId,
@@ -265,19 +273,26 @@ export class GameKahootPlayerComponent implements OnInit, OnDestroy {
       timeRemaining: this.timeRemaining
     }).subscribe({
       next: (response) => {
+        clearTimeout(timeoutId);
         if (response.success) {
           this.isCorrect = response.data.answer.isCorrect;
-          this.pointsEarned = response.data.answer.points;
+          this.pointsEarned = response.data.answer.points || 0;
           this.correctAnswer = response.data.answer.correctAnswer;
-          this.totalScore = response.data.participant.score;
+          this.totalScore = response.data.participant?.score || this.totalScore;
           this.gamePhase = 'result';
           
           // Update saved session
           this.updateSavedSession();
+        } else {
+          // API returned success: false
+          console.error('API returned error:', response);
+          this.handleAnswerError();
         }
       },
       error: (error) => {
+        clearTimeout(timeoutId);
         console.error('Error submitting answer:', error);
+        this.handleAnswerError();
       }
     });
     
@@ -310,6 +325,13 @@ export class GameKahootPlayerComponent implements OnInit, OnDestroy {
       totalScore: this.totalScore
     };
     localStorage.setItem('kahoot_player_session', JSON.stringify(session));
+  }
+
+  handleAnswerError(): void {
+    // Show result phase with error state - assume wrong answer if we can't verify
+    this.isCorrect = false;
+    this.pointsEarned = 0;
+    this.gamePhase = 'result';
   }
 
   getTimerPercentage(): number {

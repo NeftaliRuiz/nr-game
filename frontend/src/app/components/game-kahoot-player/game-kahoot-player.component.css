@@ -1,101 +1,230 @@
-/* Kahoot Player Component Styles */
+/* Kahoot Player Component - Mobile First Responsive Design */
 
-/* Animation delays for dots */
-.animation-delay-200 {
-  animation-delay: 0.2s;
-}
+/* ==================== ANIMATIONS ==================== */
 
-.animation-delay-400 {
-  animation-delay: 0.4s;
-}
-
-/* Pulse animation for waiting dots */
-@keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(0.8); opacity: 0.5; }
-}
-
-.animate-pulse {
-  animation: pulse 1s ease-in-out infinite;
-}
-
-/* Bounce animation */
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  50% { transform: translateY(-8px); }
 }
 
-.animate-bounce {
-  animation: bounce 1s ease-in-out infinite;
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
-/* Spin animation */
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-bounce {
+  animation: bounce 0.6s ease-in-out infinite;
+}
+
+.animate-pulse {
+  animation: pulse 2s ease-in-out infinite;
 }
 
 .animate-spin {
   animation: spin 1s linear infinite;
 }
 
-/* Button active state */
+.animate-slideUp {
+  animation: slideUp 0.5s ease-out forwards;
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.3s ease-out forwards;
+}
+
+/* ==================== BUTTON INTERACTIONS ==================== */
+
+button {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
 button:active:not(:disabled) {
   transform: scale(0.95);
 }
 
-/* Full height for color buttons */
-.grid {
-  min-height: 0;
+/* Answer option buttons - full touch area */
+.grid button {
+  min-height: 120px;
 }
 
-/* Smooth color transitions */
-.transition-colors {
-  transition: background-color 0.3s ease, border-color 0.3s ease;
+@media (min-height: 600px) {
+  .grid button {
+    min-height: 150px;
+  }
 }
 
-/* Scale animation for buttons */
-.active\:scale-95:active {
-  transform: scale(0.95);
+@media (min-height: 800px) {
+  .grid button {
+    min-height: 200px;
+  }
 }
 
-/* Result card animations */
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
+/* ==================== INPUT STYLING ==================== */
+
+input {
+  -webkit-appearance: none;
+  appearance: none;
 }
 
-.result-card {
-  animation: slideUp 0.5s ease-out;
+input:focus {
+  outline: none;
 }
 
-/* Confetti effect (CSS only) */
-@keyframes confetti {
-  0% { transform: translateY(-100vh) rotate(0deg); }
-  100% { transform: translateY(100vh) rotate(720deg); }
+input::placeholder {
+  color: rgba(148, 163, 184, 0.6);
 }
 
-/* Timer bar smooth transition */
+/* PIN input letter spacing fix for mobile */
+input[maxlength="6"] {
+  letter-spacing: 0.2em;
+}
+
+@media (min-width: 640px) {
+  input[maxlength="6"] {
+    letter-spacing: 0.3em;
+  }
+}
+
+/* ==================== SAFE AREA (NOTCH) SUPPORT ==================== */
+
+@supports (padding-top: env(safe-area-inset-top)) {
+  .min-h-screen {
+    min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* ==================== TIMER BAR ==================== */
+
 .timer-bar {
   transition: width 1s linear;
 }
 
-/* Input focus ring */
-input:focus {
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+/* ==================== SCROLLBAR HIDE ==================== */
+
+::-webkit-scrollbar {
+  display: none;
 }
 
-/* Button hover lift effect */
-button:hover:not(:disabled) {
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-/* Score counter animation */
-@keyframes countUp {
-  from { transform: scale(0.5); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+/* ==================== GLASS EFFECT ==================== */
+
+.backdrop-blur-xl {
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
 }
 
-.score-counter {
-  animation: countUp 0.5s ease-out;
+/* ==================== CARD SHADOWS ==================== */
+
+.shadow-2xl {
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+/* ==================== RESULT ANIMATIONS ==================== */
+
+[class*="bg-gradient-to-br"] {
+  animation: scaleIn 0.4s ease-out;
+}
+
+/* ==================== RANK BADGE ANIMATIONS ==================== */
+
+.rank-badge {
+  animation: slideUp 0.5s ease-out;
+}
+
+/* ==================== TOUCH FEEDBACK ==================== */
+
+@media (hover: none) and (pointer: coarse) {
+  /* Mobile touch devices */
+  button:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+  }
+  
+  .grid button:active {
+    opacity: 0.8;
+  }
+}
+
+/* ==================== LANDSCAPE MODE ADJUSTMENTS ==================== */
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .grid {
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+  
+  .grid button {
+    min-height: 80px;
+  }
+  
+  .grid button span:first-child {
+    font-size: 2rem !important;
+  }
+}
+
+/* ==================== DARK MODE ENHANCEMENTS ==================== */
+
+@media (prefers-color-scheme: dark) {
+  input {
+    color-scheme: dark;
+  }
+}
+
+/* ==================== REDUCE MOTION ==================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==================== LOADING STATES ==================== */
+
+.loading-dots > div:nth-child(1) { animation-delay: 0s; }
+.loading-dots > div:nth-child(2) { animation-delay: 0.1s; }
+.loading-dots > div:nth-child(3) { animation-delay: 0.2s; }
+
+/* ==================== HAPTIC FEEDBACK SIMULATION ==================== */
+
+@keyframes haptic {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+.haptic-feedback {
+  animation: haptic 0.1s ease-in-out;
 }
