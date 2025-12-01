@@ -7,20 +7,9 @@ import { Team } from '../entities/Team';
 import { Question } from '../entities/Question';
 import { Answer } from '../entities/Answer';
 import { Event } from '../entities/Event';
-import * as fs from 'fs';
-import * as path from 'path';
 
-// Load fallback questions from JSON
-let fallbackQuestions: any[] = [];
-try {
-  const questionsPath = path.join(__dirname, '../data/kahoot-questions.json');
-  const data = fs.readFileSync(questionsPath, 'utf-8');
-  const parsed = JSON.parse(data);
-  fallbackQuestions = parsed.questions || [];
-  console.log(`✅ Loaded ${fallbackQuestions.length} fallback Kahoot questions`);
-} catch (error) {
-  console.warn('⚠️ Could not load fallback questions:', error);
-}
+// No fallback questions - all questions must come from the event's Excel upload
+console.log(`✅ Kahoot controller loaded - questions will only come from event uploads`);
 
 /**
  * Generate a unique 6-character room code
@@ -36,22 +25,25 @@ function generateRoomCode(): string {
 
 /**
  * Helper: Count available questions for a game/event
+ * Only counts questions that belong to the specific event
  */
 async function countAvailableQuestions(eventId: string | null): Promise<number> {
+  if (!eventId) {
+    console.log(`📊 countAvailableQuestions: No eventId provided, returning 0`);
+    return 0;
+  }
+  
   const questionRepository = AppDataSource.getRepository(Question);
   const queryBuilder = questionRepository.createQueryBuilder('question');
   
-  if (eventId) {
-    queryBuilder.where('question.eventId = :eventId', { eventId });
-  }
+  // STRICT filter - must match eventId exactly
+  queryBuilder.where('question.eventId = :eventId', { eventId });
   
-  // Filter by game mode (KAHOOT only) - but allow NULL for backward compatibility
-  queryBuilder.andWhere('(question.gameMode = :mode OR question.gameMode IS NULL)', { 
-    mode: GameMode.KAHOOT 
-  });
+  // STRICT filter - must be KAHOOT mode (support legacy NULL values)
+  queryBuilder.andWhere('(question.gameMode = :mode OR question.gameMode IS NULL)', { mode: GameMode.KAHOOT });
   
   const count = await queryBuilder.getCount();
-  console.log(`📊 countAvailableQuestions: eventId=${eventId}, found=${count}`);
+  console.log(`📊 countAvailableQuestions: eventId=${eventId}, gameMode=kahoot, found=${count}`);
   return count;
 }
 
@@ -66,18 +58,23 @@ export async function createKahootGame(req: Request, res: Response): Promise<voi
     
     const { name, eventId, totalQuestions } = req.body;
 
-    // Validate event if provided
-    let event = null;
-    if (eventId) {
-      event = await eventRepository.findOne({ where: { id: eventId } });
-      if (!event) {
-        res.status(404).json({
-          success: false,
-          message: 'Event not found',
-        });
-        return;
-      }
+    if (!eventId) {
+      res.status(400).json({
+        success: false,
+        message: 'Debes seleccionar un evento con preguntas cargadas para crear un juego Kahoot',
+      });
+      return;
     }
+
+    const event = await eventRepository.findOne({ where: { id: eventId } });
+    if (!event) {
+      res.status(404).json({
+        success: false,
+        message: 'Event not found',
+      });
+      return;
+    }
+    console.log(`🎯 Creating Kahoot game for event ${event.name} (${event.id})`);
 
     // Generate unique room code
     let roomCode: string;
@@ -103,7 +100,15 @@ export async function createKahootGame(req: Request, res: Response): Promise<voi
     }
 
     // Count available questions for this event
-    const availableQuestions = await countAvailableQuestions(eventId || null);
+    const availableQuestions = await countAvailableQuestions(eventId);
+
+    if (availableQuestions === 0) {
+      res.status(400).json({
+        success: false,
+        message: 'Este evento no tiene preguntas cargadas. Sube un archivo de preguntas antes de crear el juego.',
+      });
+      return;
+    }
     
     // Use the minimum between requested and available questions
     const effectiveTotalQuestions = Math.min(totalQuestions || 10, availableQuestions);
@@ -256,6 +261,14 @@ export async function startKahootGame(req: Request, res: Response): Promise<void
 
     console.log(`✅ Game found: ${game.id}, eventId: ${game.eventId}`);
 
+    if (!game.eventId) {
+      res.status(400).json({
+        success: false,
+        message: 'Este juego no tiene un evento con preguntas asociado. Vuelve a crearlo seleccionando un evento.',
+      });
+      return;
+    }
+
     game.status = GameStatus.IN_PROGRESS;
     game.startedAt = new Date();
     await gameRepository.save(game);
@@ -291,62 +304,58 @@ export async function startKahootGame(req: Request, res: Response): Promise<void
 }
 
 /**
- * Helper: Get random question for game
+ * Helper: Get next question for game (in order, not random)
+ * Only uses questions from the event - no fallback to JSON files
  */
 async function getRandomQuestion(game: Game, questionRepository: any, gameRepository: any): Promise<any> {
-  console.log(`🔍 Getting random question for game ${game.roomCode}`);
+  console.log(`🔍 Getting next question for game ${game.roomCode}`);
   console.log(`   Game eventId: ${game.eventId}`);
   console.log(`   Used questions: ${game.usedQuestionIds?.length || 0}`);
   
-  // First, try to get from database
-  const queryBuilder = questionRepository.createQueryBuilder('question');
-
-  // Filter by event if specified
-  if (game.eventId) {
-    queryBuilder.where('question.eventId = :eventId', { eventId: game.eventId });
-    console.log(`   Filtering by eventId: ${game.eventId}`);
-  } else {
-    console.log(`   ⚠️ No eventId - this game has no event associated!`);
+  // MUST have an eventId - no fallback questions allowed
+  if (!game.eventId) {
+    console.log(`   ❌ No eventId - cannot get questions without an event!`);
+    return null;
   }
 
-  // Filter by game mode (KAHOOT only) - but allow NULL for backward compatibility
-  queryBuilder.andWhere('(question.gameMode = :mode OR question.gameMode IS NULL)', { 
-    mode: GameMode.KAHOOT 
-  });
-  console.log(`   Filtering by gameMode: ${GameMode.KAHOOT} or NULL`);
+  const queryBuilder = questionRepository.createQueryBuilder('question');
+
+  // STRICT filter by eventId - only questions from this event
+  queryBuilder.where('question.eventId = :eventId', { eventId: game.eventId });
+  console.log(`   Filtering STRICTLY by eventId: ${game.eventId}`);
+
+  // Filter by game mode (KAHOOT only) but support legacy NULL values
+  queryBuilder.andWhere('(question.gameMode = :mode OR question.gameMode IS NULL)', { mode: GameMode.KAHOOT });
+  console.log(`   Filtering by gameMode: ${GameMode.KAHOOT}`);
 
   // Exclude already used questions
   if (game.usedQuestionIds && game.usedQuestionIds.length > 0) {
     queryBuilder.andWhere('question.id NOT IN (:...usedIds)', {
       usedIds: game.usedQuestionIds,
     });
+    console.log(`   Excluding ${game.usedQuestionIds.length} used questions`);
   }
 
-  // Log the SQL query for debugging
-  console.log(`   SQL: ${queryBuilder.getSql()}`);
+  // ORDER strictly by upload order (round) and fallback to creation date
+  queryBuilder
+    .orderBy('COALESCE(question.round, 1000000)', 'ASC')
+    .addOrderBy('question.createdAt', 'ASC')
+    .take(1);
 
-  let questions = await queryBuilder.getMany();
-  console.log(`   Found ${questions.length} questions in database`);
+  const selectedQuestion = await queryBuilder.getOne();
   
-  if (questions.length > 0) {
-    console.log(`   Sample question: ${questions[0].id} - ${questions[0].question?.substring(0, 50)}...`);
-  }
-  
-  // No fallback - only use questions from the event/database
-  if (questions.length === 0) {
-    console.log(`   No questions available - game will end`);
+  if (!selectedQuestion) {
+    console.log(`   ✅ No more questions available - game complete!`);
     return null;
   }
-
-  // Pick random question from database
-  const randomIndex = Math.floor(Math.random() * questions.length);
-  const selectedQuestion = questions[randomIndex];
 
   // Add to used questions
   game.usedQuestionIds = [...(game.usedQuestionIds || []), selectedQuestion.id];
   await gameRepository.save(game);
 
-  console.log(`   Selected DB question: ${selectedQuestion.id}`);
+  console.log(`   📝 Selected question #${game.usedQuestionIds.length}: ${selectedQuestion.id}`);
+  console.log(`   Order: ${selectedQuestion.round ?? 'sin orden'} | Question: "${selectedQuestion.question?.substring(0, 50)}..."`);
+  
   return selectedQuestion;
 }
 
@@ -483,6 +492,14 @@ export async function nextKahootQuestion(req: Request, res: Response): Promise<v
       res.status(404).json({
         success: false,
         message: 'Game not found',
+      });
+      return;
+    }
+
+    if (!game.eventId) {
+      res.status(400).json({
+        success: false,
+        message: 'Este juego no tiene preguntas asociadas. Crea un nuevo juego seleccionando un evento con preguntas.',
       });
       return;
     }

@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import { AppDataSource } from '../config/database';
 import { Question, QuestionDifficulty } from '../entities/Question';
-import { Event } from '../entities/Event';
+import { Event, EventStatus } from '../entities/Event';
+import { Answer } from '../entities/Answer';
 import { GameMode } from '../entities/Game';
 // Use require for xlsx to avoid ESM/CJS compatibility issues
 const XLSX = require('xlsx');
@@ -168,12 +169,14 @@ export async function saveQuestionsFromUpload(req: Request, res: Response): Prom
     console.log(`   eventId: ${eventId}`)
     console.log(`   gameMode: ${gameMode}`)
     console.log(`   file: ${req.file.originalname}`);
-
-    // Validate event if provided
+    
+    const eventRepository = AppDataSource.getRepository(Event);
+    let effectiveEventId = eventId && eventId.trim().length > 0 ? eventId.trim() : null;
     let event = null;
-    if (eventId) {
-      const eventRepository = AppDataSource.getRepository(Event);
-      event = await eventRepository.findOne({ where: { id: eventId } });
+    let eventAutoCreated = false;
+
+    if (effectiveEventId) {
+      event = await eventRepository.findOne({ where: { id: effectiveEventId } });
       if (!event) {
         fs.unlinkSync(filePath);
         res.status(404).json({
@@ -182,6 +185,19 @@ export async function saveQuestionsFromUpload(req: Request, res: Response): Prom
         });
         return;
       }
+    } else {
+      event = eventRepository.create({
+        name: `Evento Kahoot ${new Date().toLocaleString()}`,
+        description: `Evento autogenerado para ${req.file.originalname}`,
+        startDate: new Date(),
+        status: EventStatus.ACTIVE,
+        isActive: true,
+      });
+
+      event = await eventRepository.save(event);
+      effectiveEventId = event.id;
+      eventAutoCreated = true;
+      console.log(`   🆕 Evento autogenerado: ${event.name} (${event.id})`);
     }
 
     // Read Excel file
@@ -189,6 +205,9 @@ export async function saveQuestionsFromUpload(req: Request, res: Response): Prom
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
     const rawData: any[] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    
+    console.log(`   Sheet name: ${sheetName}`);
+    console.log(`   Total rows: ${rawData.length}`);
 
     if (rawData.length < 2) {
       fs.unlinkSync(filePath);
@@ -200,9 +219,51 @@ export async function saveQuestionsFromUpload(req: Request, res: Response): Prom
     }
 
     const headers = rawData[0].map((h: string) => h?.toString().toLowerCase().trim());
+    console.log(`   Headers found: ${JSON.stringify(headers)}`);
+    
     const questionRepository = AppDataSource.getRepository(Question);
+    const answerRepository = AppDataSource.getRepository(Answer);
+
+    // Clean up previous questions linked to this event to avoid mixing data between uploads
+    if (effectiveEventId) {
+      const questionIdsQuery = questionRepository
+        .createQueryBuilder('question')
+        .select('question.id', 'id')
+        .where('question.eventId = :eventId', { eventId: effectiveEventId });
+
+      if (gameMode) {
+        questionIdsQuery.andWhere('(question.gameMode = :gameMode OR question.gameMode IS NULL)', { gameMode });
+      }
+
+      const questionIdRows = await questionIdsQuery.getRawMany();
+      const questionIds = questionIdRows.map((row) => row.id);
+
+      if (questionIds.length > 0) {
+        const deletedAnswers = await answerRepository
+          .createQueryBuilder()
+          .delete()
+          .from(Answer)
+          .where('questionId IN (:...ids)', { ids: questionIds })
+          .execute();
+        console.log(`   🧽 Removed ${deletedAnswers.affected || 0} answers linked to event ${effectiveEventId}`);
+
+        const deleteQuery = questionRepository
+          .createQueryBuilder()
+          .delete()
+          .from(Question)
+          .where('eventId = :eventId', { eventId: effectiveEventId });
+
+        if (gameMode) {
+          deleteQuery.andWhere('(gameMode = :gameMode OR gameMode IS NULL)', { gameMode });
+        }
+
+        const deleteResult = await deleteQuery.execute();
+        console.log(`   🧹 Removed ${deleteResult.affected || 0} existing questions for event ${effectiveEventId} (${gameMode || 'any mode'})`);
+      }
+    }
     
     const savedQuestions: Question[] = [];
+    let importOrder = 0;
     const errors: { row: number; error: string }[] = [];
 
     for (let i = 1; i < rawData.length; i++) {
@@ -212,6 +273,7 @@ export async function saveQuestionsFromUpload(req: Request, res: Response): Prom
       const parsed = parseRow(row, headers, i + 1);
       
       if (!parsed.isValid) {
+        console.log(`   ❌ Row ${i + 1} invalid: ${parsed.errors.join(', ')}`);
         errors.push({ row: i + 1, error: parsed.errors.join(', ') });
         continue;
       }
@@ -226,6 +288,8 @@ export async function saveQuestionsFromUpload(req: Request, res: Response): Prom
           difficulty = QuestionDifficulty.HARD;
         }
 
+        importOrder += 1;
+
         const question = questionRepository.create({
           question: parsed.question,
           options: [parsed.option1, parsed.option2, parsed.option3, parsed.option4],
@@ -234,11 +298,12 @@ export async function saveQuestionsFromUpload(req: Request, res: Response): Prom
           difficulty,
           points: parsed.points || getDifficultyPoints(difficulty),
           timeLimit: parsed.timeLimit || 20,
-          eventId: eventId || null,
-          gameMode: gameMode || null
+          eventId: effectiveEventId,
+          gameMode: gameMode || null,
+          round: importOrder,
         });
 
-        console.log(`   💾 Saving question: "${parsed.question.substring(0, 40)}..." | eventId: ${eventId} | gameMode: ${gameMode}`);
+        console.log(`   💾 Saving question: "${parsed.question.substring(0, 40)}..." | eventId: ${effectiveEventId} | gameMode: ${gameMode}`);
         
         const saved = await questionRepository.save(question);
         savedQuestions.push(saved);
@@ -264,9 +329,17 @@ export async function saveQuestionsFromUpload(req: Request, res: Response): Prom
           question: q.question,
           category: q.category,
           difficulty: q.difficulty
-        }))
+        })),
+        event: event ? {
+          id: event.id,
+          name: event.name,
+          status: event.status,
+        } : null,
+        eventAutoCreated
       },
-      message: `Se guardaron ${savedQuestions.length} preguntas exitosamente`
+      message: eventAutoCreated
+        ? `Se guardaron ${savedQuestions.length} preguntas y se creó el evento "${event?.name}" automáticamente`
+        : `Se guardaron ${savedQuestions.length} preguntas exitosamente`
     });
 
   } catch (error) {
@@ -464,7 +537,11 @@ function parseRow(row: any[], headers: string[], rowNumber: number): ParsedQuest
   const option2 = row[opt2Idx]?.toString().trim() || '';
   const option3 = row[opt3Idx]?.toString().trim() || '';
   const option4 = row[opt4Idx]?.toString().trim() || '';
-  const correctAnswer = parseInt(row[correctIdx]) || 0;
+  
+  // Parse correct answer - support multiple formats
+  const correctRaw = row[correctIdx]?.toString().trim() || '';
+  let correctAnswer = parseCorrectAnswer(correctRaw, [option1, option2, option3, option4]);
+  
   const category = row[categoryIdx]?.toString().trim() || 'General';
   const difficulty = row[difficultyIdx]?.toString().trim() || 'medio';
   const points = parseInt(row[pointsIdx]) || 0;
@@ -477,7 +554,7 @@ function parseRow(row: any[], headers: string[], rowNumber: number): ParsedQuest
   if (!option3) errors.push('Falta opción 3');
   if (!option4) errors.push('Falta opción 4');
   if (correctAnswer < 1 || correctAnswer > 4) {
-    errors.push('La respuesta correcta debe ser 1, 2, 3 o 4');
+    errors.push(`La respuesta correcta "${correctRaw}" no es válida. Use 1, 2, 3, 4 o A, B, C, D o el texto exacto de la opción correcta`);
   }
 
   return {
@@ -495,6 +572,44 @@ function parseRow(row: any[], headers: string[], rowNumber: number): ParsedQuest
     isValid: errors.length === 0,
     errors
   };
+}
+
+/**
+ * Parse correct answer from various formats
+ * Supports: 1,2,3,4 | A,B,C,D | exact option text
+ */
+function parseCorrectAnswer(value: string, options: string[]): number {
+  if (!value) return 0;
+  
+  const normalized = value.toLowerCase().trim();
+  
+  // Try as number (1, 2, 3, 4)
+  const num = parseInt(value);
+  if (!isNaN(num) && num >= 1 && num <= 4) {
+    return num;
+  }
+  
+  // Try as letter (A, B, C, D)
+  const letterMap: { [key: string]: number } = { 'a': 1, 'b': 2, 'c': 3, 'd': 4 };
+  if (letterMap[normalized]) {
+    return letterMap[normalized];
+  }
+  
+  // Try matching exact option text
+  for (let i = 0; i < options.length; i++) {
+    if (options[i].toLowerCase().trim() === normalized) {
+      return i + 1;
+    }
+  }
+  
+  // Try matching partial option text (contains)
+  for (let i = 0; i < options.length; i++) {
+    if (options[i].toLowerCase().includes(normalized) || normalized.includes(options[i].toLowerCase())) {
+      return i + 1;
+    }
+  }
+  
+  return 0; // Invalid
 }
 
 function findColumnIndex(headers: string[], possibleNames: string[]): number {

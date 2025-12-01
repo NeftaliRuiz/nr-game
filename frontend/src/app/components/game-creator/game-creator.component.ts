@@ -93,6 +93,11 @@ export class GameCreatorComponent implements OnInit {
       return;
     }
 
+    if (this.selectedMode === 'KAHOOT' && !this.selectedEventId) {
+      this.errorMessage = 'Selecciona un evento con preguntas cargadas para poder crear un Kahoot.';
+      return;
+    }
+
     this.isLoading = true;
     this.loadingMessage = 'Creando juego...';
     this.resetMessages();

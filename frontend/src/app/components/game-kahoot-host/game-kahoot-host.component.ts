@@ -296,24 +296,21 @@ export class GameKahootHostComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.questionFile && !this.selectedEventId) {
-      this.errorMessage = 'Selecciona un evento para asociar las preguntas que subas.';
-      setTimeout(() => this.errorMessage = '', 3500);
+    if (!this.selectedEventId && !this.questionFile) {
+      this.errorMessage = 'Selecciona un evento o sube un archivo de preguntas para generar uno automáticamente.';
+      setTimeout(() => this.errorMessage = '', 4000);
       return;
     }
 
     this.isLoading = true;
 
-    const createData: any = {
-      name: this.gameName,
-      totalQuestions: this.questionCount
-    };
-    
-    if (this.selectedEventId) {
-      createData.eventId = this.selectedEventId;
-    }
-
     const finishCreation = () => {
+      const createData: any = {
+        name: this.gameName,
+        totalQuestions: this.questionCount,
+        eventId: this.selectedEventId
+      };
+
       this.gameService.createKahootGame(createData).subscribe({
         next: (response: any) => {
           if (response.success) {
@@ -377,12 +374,29 @@ export class GameKahootHostComponent implements OnInit, OnDestroy {
         next: (response) => {
           this.isUploadingQuestions = false;
           this.uploadedQuestionCount = response?.data?.savedCount || 0;
-          this.questionUploadSummary = `Preguntas vinculadas al evento (${this.uploadedQuestionCount})`;
-          this.successMessage = `Se cargaron ${this.uploadedQuestionCount} preguntas para este evento`;
+          const linkedEvent = response?.data?.event;
+          if (linkedEvent?.id) {
+            this.selectedEventId = linkedEvent.id;
+            const existingEvent = this.events.find(e => e.id === linkedEvent.id);
+            if (!existingEvent) {
+              this.events = [...this.events, linkedEvent];
+            } else {
+              Object.assign(existingEvent, linkedEvent);
+            }
+            this.questionUploadSummary = `Preguntas vinculadas al evento "${linkedEvent.name}" (${this.uploadedQuestionCount})`;
+          } else {
+            this.questionUploadSummary = `Preguntas vinculadas al evento (${this.uploadedQuestionCount})`;
+          }
+          if (response?.data?.eventAutoCreated) {
+            this.successMessage = `Se creó automáticamente el evento "${linkedEvent?.name || 'Nuevo evento'}" con ${this.uploadedQuestionCount} preguntas`;
+          } else {
+            this.successMessage = `Se cargaron ${this.uploadedQuestionCount} preguntas para este evento`;
+          }
           setTimeout(() => this.successMessage = '', 3000);
           this.clearQuestionFileInput();
           this.questionFile = null;
           this.questionFileName = '';
+          this.loadEvents();
           finishCreation();
         },
         error: (error) => {
