@@ -4,20 +4,25 @@ import { Question, QuestionDifficulty } from '../entities/Question';
 import { Event, EventStatus } from '../entities/Event';
 import { Answer } from '../entities/Answer';
 import { GameMode } from '../entities/Game';
+import * as os from 'os';
 // Use require for xlsx to avoid ESM/CJS compatibility issues
 const XLSX = require('xlsx');
 import multer from 'multer';
 import * as path from 'path';
 import * as fs from 'fs';
 
+const uploadsDir = process.env.UPLOADS_DIR
+  ? process.env.UPLOADS_DIR
+  : path.join(os.tmpdir(), 'trivia-uploads');
+
 // Configure multer for file upload
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadDir = path.join(__dirname, '../../uploads');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
+    const normalizedDir = uploadsDir;
+    if (!fs.existsSync(normalizedDir)) {
+      fs.mkdirSync(normalizedDir, { recursive: true });
     }
-    cb(null, uploadDir);
+    cb(null, normalizedDir);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
