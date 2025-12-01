@@ -7,6 +7,7 @@ import { GameKahootHostComponent } from './components/game-kahoot-host/game-kaho
 import { GameKahootPlayerComponent } from './components/game-kahoot-player/game-kahoot-player.component';
 import { GameGeopartyComponent } from './components/game-geoparty/game-geoparty.component';
 import { GameWordsearchComponent } from './components/game-wordsearch/game-wordsearch.component';
+import { QuestionUploadComponent } from './components/question-upload/question-upload.component';
 import { AuthGuard } from './guards/auth.guard';
 
 import { GameJoinComponent } from './components/game-join/game-join.component';
@@ -18,6 +19,9 @@ const routes: Routes = [
   { path: 'game', component: GameBoardComponent },
   { path: 'join', component: GameJoinComponent }, // JOIN ROUTE
   { path: 'game/join', component: GameJoinComponent }, // ALTERNATIVE JOIN ROUTE
+  
+  // Question upload (for hosts)
+  { path: 'questions/upload', component: QuestionUploadComponent },
   
   // Kahoot game modes
   { path: 'game/kahoot', component: GameKahootComponent },

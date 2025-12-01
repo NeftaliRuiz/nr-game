@@ -13,6 +13,7 @@ import adminRoutes from './routes/admin.routes';
 import eventRoutes from './routes/event.routes';
 import gameRoutes from './routes/game.routes';
 import teamRoutes from './routes/team.routes';
+import questionsRoutes from './routes/questions.routes';
 
 dotenv.config();
 
@@ -44,6 +45,7 @@ app.use('/api/admin', adminRoutes); // Admin panel routes
 app.use('/api/events', eventRoutes); // Event management routes
 app.use('/api/teams', teamRoutes); // Team management routes
 app.use('/api/game', gameRoutes); // Game routes (Kahoot & Geoparty)
+app.use('/api/questions', questionsRoutes); // Questions upload routes
 
 // Health check
 app.get('/health', (req: Request, res: Response) => {

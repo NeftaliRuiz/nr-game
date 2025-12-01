@@ -221,6 +221,15 @@ export class GameService {
     return this.http.get<GameDetailsResponse>(`${this.API_URL}/kahoot/${gameId}`);
   }
 
+  // ==================== EVENTS ====================
+
+  /**
+   * Get all available events
+   */
+  getEvents(): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/events`);
+  }
+
   // ==================== GEOPARTY METHODS ====================
 
   /**

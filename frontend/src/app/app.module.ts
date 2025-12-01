@@ -18,6 +18,7 @@ import { GameKahootPlayerComponent } from './components/game-kahoot-player/game-
 import { GameGeopartyComponent } from './components/game-geoparty/game-geoparty.component';
 import { GameWordsearchComponent } from './components/game-wordsearch/game-wordsearch.component';
 import { GameJoinComponent } from './components/game-join/game-join.component';
+import { QuestionUploadComponent } from './components/question-upload/question-upload.component';
 
 import { TriviaService } from './services/trivia.service';
 import { AuthService } from './services/auth.service';
@@ -39,7 +40,8 @@ import { AuthGuard } from './guards/auth.guard';
     GameKahootHostComponent,
     GameKahootPlayerComponent,
     GameGeopartyComponent,
-    GameWordsearchComponent
+    GameWordsearchComponent,
+    QuestionUploadComponent
   ],
   imports: [
     BrowserModule,

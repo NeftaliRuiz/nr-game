@@ -7,6 +7,7 @@ import { WebsocketService } from '../../services/websocket.service';
 interface Question {
   id: string;
   question: string;
+  text?: string;
   options: string[];
   correctAnswer: number;
   difficulty: string;
@@ -18,8 +19,19 @@ interface Question {
 interface Participant {
   id: string;
   userName: string;
+  name?: string;
   score: number;
   hasAnswered: boolean;
+  correctAnswers?: number;
+}
+
+interface SavedGame {
+  gameId: string;
+  roomCode: string;
+  gameName: string;
+  createdAt: string;
+  status: 'waiting' | 'active' | 'paused' | 'finished';
+  participantCount: number;
 }
 
 @Component({
@@ -33,12 +45,19 @@ export class GameKahootHostComponent implements OnInit, OnDestroy {
   roomCode: string = '';
   gameName: string = 'Trivia Kahoot';
   totalQuestions: number = 10;
+  questionCount: number = 10;
+  timePerQuestion: number = 20;
+  selectedEventId: string = '';
   
-  // Game phases: 'setup' | 'lobby' | 'countdown' | 'question' | 'answer-reveal' | 'leaderboard' | 'final-results'
-  gamePhase: string = 'setup';
+  // Game phases: 'menu' | 'setup' | 'lobby' | 'countdown' | 'question' | 'answer-reveal' | 'leaderboard' | 'final-results'
+  gamePhase: string = 'menu';
+  
+  // Saved games
+  savedGames: SavedGame[] = [];
   
   // Current question data
   currentQuestion: Question | null = null;
+  currentQuestionIndex: number = 0;
   questionNumber: number = 0;
   
   // Timer
@@ -50,15 +69,22 @@ export class GameKahootHostComponent implements OnInit, OnDestroy {
   
   // Participants & Answers
   participants: Participant[] = [];
+  answeredCount: number = 0;
   answersReceived: number = 0;
   answerDistribution: number[] = [0, 0, 0, 0]; // Count per option
   
   // Leaderboard
   leaderboard: LeaderboardEntry[] = [];
   
+  // Events
+  events: any[] = [];
+  
   // UI State
   isLoading: boolean = false;
   showQRCode: boolean = false;
+  errorMessage: string = '';
+  successMessage: string = '';
+  joinUrl: string = '';
   
   // WebSocket subscriptions
   private subscriptions: Subscription[] = [];
@@ -78,17 +104,19 @@ export class GameKahootHostComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    // Load saved games from localStorage
+    this.loadSavedGames();
+    this.loadEvents();
+    
     // Check if returning to existing game
     const savedGame = localStorage.getItem('kahoot_host_game');
     if (savedGame) {
       try {
         const game = JSON.parse(savedGame);
-        this.gameId = game.gameId;
-        this.roomCode = game.roomCode;
-        this.gameName = game.gameName;
-        this.gamePhase = 'lobby';
-        this.connectWebSocket();
-        this.loadGameState();
+        if (game.gameId && game.roomCode) {
+          // Don't auto-connect, just show menu with option to resume
+          this.gamePhase = 'menu';
+        }
       } catch (e) {
         localStorage.removeItem('kahoot_host_game');
       }
@@ -101,6 +129,148 @@ export class GameKahootHostComponent implements OnInit, OnDestroy {
     this.websocketService.disconnect();
   }
 
+  // ==================== SAVED GAMES MANAGEMENT ====================
+
+  loadSavedGames(): void {
+    const games = localStorage.getItem('kahoot_saved_games');
+    if (games) {
+      try {
+        this.savedGames = JSON.parse(games);
+        // Sort by date, most recent first
+        this.savedGames.sort((a, b) => 
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      } catch (e) {
+        this.savedGames = [];
+      }
+    }
+  }
+
+  saveSavedGames(): void {
+    localStorage.setItem('kahoot_saved_games', JSON.stringify(this.savedGames));
+  }
+
+  addToSavedGames(game: SavedGame): void {
+    // Remove if exists (to update)
+    this.savedGames = this.savedGames.filter(g => g.gameId !== game.gameId);
+    // Add to beginning
+    this.savedGames.unshift(game);
+    // Keep only last 20 games
+    if (this.savedGames.length > 20) {
+      this.savedGames = this.savedGames.slice(0, 20);
+    }
+    this.saveSavedGames();
+  }
+
+  updateSavedGameStatus(gameId: string, status: 'waiting' | 'active' | 'paused' | 'finished', participantCount?: number): void {
+    const game = this.savedGames.find(g => g.gameId === gameId);
+    if (game) {
+      game.status = status;
+      if (participantCount !== undefined) {
+        game.participantCount = participantCount;
+      }
+      this.saveSavedGames();
+    }
+  }
+
+  deleteSavedGame(gameId: string): void {
+    if (confirm('¿Eliminar este juego del historial?')) {
+      this.savedGames = this.savedGames.filter(g => g.gameId !== gameId);
+      this.saveSavedGames();
+    }
+  }
+
+  loadEvents(): void {
+    // Load available events for question filtering
+    this.gameService.getEvents().subscribe({
+      next: (response: any) => {
+        if (response.success) {
+          this.events = response.data.events || [];
+        }
+      },
+      error: () => {
+        this.events = [];
+      }
+    });
+  }
+
+  // ==================== NAVIGATION ====================
+
+  goToMenu(): void {
+    this.stopTimer();
+    this.websocketService.disconnect();
+    this.gamePhase = 'menu';
+    this.resetGameState();
+  }
+
+  goToSetup(): void {
+    this.gamePhase = 'setup';
+    this.resetGameState();
+  }
+
+  resetGameState(): void {
+    this.gameId = '';
+    this.roomCode = '';
+    this.currentQuestion = null;
+    this.questionNumber = 0;
+    this.participants = [];
+    this.leaderboard = [];
+    this.answersReceived = 0;
+    this.answerDistribution = [0, 0, 0, 0];
+  }
+
+  resumeGame(savedGame: SavedGame): void {
+    this.isLoading = true;
+    
+    // Try to load game from API
+    this.gameService.getKahootGame(savedGame.roomCode).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.gameId = savedGame.gameId;
+          this.roomCode = savedGame.roomCode;
+          this.gameName = savedGame.gameName;
+          
+          // Update join URL
+          this.joinUrl = `${window.location.origin}/game/kahoot/join/${this.roomCode}`;
+          
+          // Set participants
+          this.participants = response.data.participantsList?.map((p: any) => ({
+            id: p.id,
+            userName: p.userName || 'Jugador',
+            name: p.userName || 'Jugador',
+            score: p.score || 0,
+            hasAnswered: false,
+            correctAnswers: p.correctAnswers || 0
+          })) || [];
+          
+          // Save as current game
+          localStorage.setItem('kahoot_host_game', JSON.stringify({
+            gameId: this.gameId,
+            roomCode: this.roomCode,
+            gameName: this.gameName
+          }));
+          
+          this.gamePhase = 'lobby';
+          this.connectWebSocket();
+          
+          // Update saved game status
+          this.updateSavedGameStatus(this.gameId, 'waiting', this.participants.length);
+        } else {
+          this.errorMessage = 'No se pudo cargar el juego. Es posible que haya expirado.';
+          setTimeout(() => this.errorMessage = '', 3000);
+          this.deleteSavedGame(savedGame.gameId);
+        }
+        this.isLoading = false;
+      },
+      error: () => {
+        this.errorMessage = 'Error al cargar el juego. Es posible que haya expirado.';
+        setTimeout(() => this.errorMessage = '', 3000);
+        this.deleteSavedGame(savedGame.gameId);
+        this.isLoading = false;
+      }
+    });
+  }
+
   // ==================== GAME SETUP ====================
 
   createGame(): void {
@@ -111,21 +281,41 @@ export class GameKahootHostComponent implements OnInit, OnDestroy {
 
     this.isLoading = true;
 
-    this.gameService.createKahootGame({
+    const createData: any = {
       name: this.gameName,
-      totalQuestions: this.totalQuestions
-    }).subscribe({
+      totalQuestions: this.questionCount
+    };
+    
+    if (this.selectedEventId) {
+      createData.eventId = this.selectedEventId;
+    }
+
+    this.gameService.createKahootGame(createData).subscribe({
       next: (response) => {
         if (response.success) {
           this.gameId = response.data.game.id;
           this.roomCode = response.data.game.roomCode || '';
+          this.totalQuestions = this.questionCount;
           
-          // Save to localStorage
+          // Update join URL
+          this.joinUrl = `${window.location.origin}/game/kahoot/join/${this.roomCode}`;
+          
+          // Save to localStorage as current game
           localStorage.setItem('kahoot_host_game', JSON.stringify({
             gameId: this.gameId,
             roomCode: this.roomCode,
             gameName: this.gameName
           }));
+          
+          // Add to saved games history
+          this.addToSavedGames({
+            gameId: this.gameId,
+            roomCode: this.roomCode,
+            gameName: this.gameName,
+            createdAt: new Date().toISOString(),
+            status: 'waiting',
+            participantCount: 0
+          });
           
           this.gamePhase = 'lobby';
           this.connectWebSocket();
@@ -134,7 +324,8 @@ export class GameKahootHostComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error creating game:', error);
-        alert('Error al crear el juego');
+        this.errorMessage = 'Error al crear el juego';
+        setTimeout(() => this.errorMessage = '', 3000);
         this.isLoading = false;
       }
     });
@@ -172,6 +363,7 @@ export class GameKahootHostComponent implements OnInit, OnDestroy {
     // Answer submitted
     const answerSub = this.websocketService.on('answer-submitted').subscribe((data: any) => {
       this.answersReceived++;
+      this.answeredCount++;
       // Update answer distribution
       if (data.selectedAnswer >= 0 && data.selectedAnswer < 4) {
         this.answerDistribution[data.selectedAnswer]++;
@@ -192,9 +384,16 @@ export class GameKahootHostComponent implements OnInit, OnDestroy {
           this.participants = response.data.participantsList.map((p: any) => ({
             id: p.id,
             userName: p.userName || 'Jugador',
+            name: p.userName || 'Jugador',
             score: p.score || 0,
-            hasAnswered: false
+            hasAnswered: false,
+            correctAnswers: p.correctAnswers || 0
           }));
+          
+          // Update saved game participant count
+          if (this.gameId) {
+            this.updateSavedGameStatus(this.gameId, 'waiting', this.participants.length);
+          }
         }
       }
     });
@@ -261,18 +460,19 @@ export class GameKahootHostComponent implements OnInit, OnDestroy {
     
     this.gamePhase = 'question';
     this.answersReceived = 0;
+    this.answeredCount = 0;
     this.answerDistribution = [0, 0, 0, 0];
     this.participants.forEach(p => p.hasAnswered = false);
     
-    // Set timer
-    this.timeLimit = this.currentQuestion.timeLimit || 20;
+    // Set timer using configured time or question time limit
+    this.timeLimit = this.timePerQuestion || this.currentQuestion.timeLimit || 20;
     this.timeRemaining = this.timeLimit;
     this.timerProgress = 100;
     
     // Broadcast question to players (without correct answer)
     this.websocketService.changeQuestion(this.roomCode, {
       id: this.currentQuestion.id,
-      question: this.currentQuestion.question,
+      question: this.currentQuestion.question || this.currentQuestion.text,
       options: this.currentQuestion.options,
       timeLimit: this.timeLimit,
       category: this.currentQuestion.category,
@@ -332,7 +532,10 @@ export class GameKahootHostComponent implements OnInit, OnDestroy {
     // Notify all players
     this.websocketService.endGame(this.roomCode, this.leaderboard);
     
-    // Clear saved game
+    // Update saved game status to finished
+    this.updateSavedGameStatus(this.gameId, 'finished', this.participants.length);
+    
+    // Clear current game reference
     localStorage.removeItem('kahoot_host_game');
   }
 
@@ -401,6 +604,42 @@ export class GameKahootHostComponent implements OnInit, OnDestroy {
   getAnswerPercentage(index: number): number {
     if (this.answersReceived === 0) return 0;
     return Math.round((this.answerDistribution[index] / this.answersReceived) * 100);
+  }
+
+  getAnswerCount(index: number): number {
+    return this.answerDistribution[index] || 0;
+  }
+
+  getProgressPercentage(): number {
+    if (this.participants.length === 0) return 0;
+    return Math.round((this.answeredCount / this.participants.length) * 100);
+  }
+
+  getLeaderboard(): Participant[] {
+    // Merge leaderboard data with participants
+    const sorted = [...this.participants].sort((a, b) => (b.score || 0) - (a.score || 0));
+    return sorted.map(p => ({
+      ...p,
+      name: p.userName || p.name || 'Jugador'
+    }));
+  }
+
+  copyJoinUrl(): void {
+    navigator.clipboard.writeText(this.joinUrl).then(() => {
+      this.successMessage = 'Enlace copiado al portapapeles';
+      setTimeout(() => this.successMessage = '', 3000);
+    });
+  }
+
+  onEventChange(): void {
+    // Could load questions count for selected event
+    console.log('Event changed:', this.selectedEventId);
+  }
+
+  playAgain(): void {
+    // Reset game state and go to setup
+    this.resetGameState();
+    this.gamePhase = 'setup';
   }
 
   endGame(): void {

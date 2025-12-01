@@ -1,0 +1,258 @@
+<div class="question-upload-container">
+  <!-- ==================== STEP 1: SELECT FILE ==================== -->
+  <div *ngIf="currentStep === 'select'" class="step-select">
+    <div class="header">
+      <h2 class="title">
+        <span class="icon">📁</span>
+        Cargar Preguntas desde Excel
+      </h2>
+      <p class="subtitle">Sube un archivo Excel con tus preguntas para agregarlas al banco de datos</p>
+    </div>
+
+    <!-- Template Download -->
+    <div class="template-section">
+      <div class="template-card">
+        <div class="template-info">
+          <span class="template-icon">📋</span>
+          <div>
+            <h4>Plantilla de Ejemplo</h4>
+            <p>Descarga la plantilla con el formato correcto</p>
+          </div>
+        </div>
+        <button (click)="downloadTemplate()" class="btn-template">
+          <span>⬇️</span> Descargar Plantilla
+        </button>
+      </div>
+    </div>
+
+    <!-- Drop Zone -->
+    <div 
+      class="drop-zone"
+      [class.drag-over]="dragOver"
+      [class.has-file]="selectedFile"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave($event)"
+      (drop)="onDrop($event)"
+    >
+      <input 
+        type="file" 
+        id="fileInput"
+        accept=".xlsx,.xls,.csv"
+        (change)="onFileSelected($event)"
+        hidden
+      >
+      
+      <div *ngIf="!selectedFile" class="drop-content">
+        <div class="drop-icon">📄</div>
+        <p class="drop-text">Arrastra tu archivo aquí</p>
+        <p class="drop-subtext">o</p>
+        <label for="fileInput" class="btn-browse">Seleccionar Archivo</label>
+        <p class="drop-formats">Formatos: .xlsx, .xls, .csv (máx. 5MB)</p>
+      </div>
+      
+      <div *ngIf="selectedFile" class="file-selected">
+        <div class="file-icon">✅</div>
+        <p class="file-name">{{ selectedFile.name }}</p>
+        <p class="file-size">{{ (selectedFile.size / 1024).toFixed(1) }} KB</p>
+        <button (click)="selectedFile = null; errorMessage = ''" class="btn-remove">Cambiar archivo</button>
+      </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div *ngIf="isLoading" class="progress-section">
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="uploadProgress"></div>
+      </div>
+      <p class="progress-text">Procesando archivo... {{ uploadProgress }}%</p>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="error-message">
+      <span class="error-icon">⚠️</span>
+      {{ errorMessage }}
+    </div>
+
+    <!-- Format Guide -->
+    <div class="format-guide">
+      <h4>📝 Formato del archivo:</h4>
+      <table class="format-table">
+        <thead>
+          <tr>
+            <th>Columna</th>
+            <th>Descripción</th>
+            <th>Requerido</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>pregunta</code></td>
+            <td>Texto de la pregunta</td>
+            <td>✅ Sí</td>
+          </tr>
+          <tr>
+            <td><code>opcion1</code> - <code>opcion4</code></td>
+            <td>Las 4 opciones de respuesta</td>
+            <td>✅ Sí</td>
+          </tr>
+          <tr>
+            <td><code>respuesta_correcta</code></td>
+            <td>Número 1-4 de la respuesta correcta</td>
+            <td>✅ Sí</td>
+          </tr>
+          <tr>
+            <td><code>categoria</code></td>
+            <td>Categoría de la pregunta</td>
+            <td>Opcional</td>
+          </tr>
+          <tr>
+            <td><code>dificultad</code></td>
+            <td>facil, medio, dificil</td>
+            <td>Opcional</td>
+          </tr>
+          <tr>
+            <td><code>puntos</code></td>
+            <td>Puntos por respuesta correcta</td>
+            <td>Opcional</td>
+          </tr>
+          <tr>
+            <td><code>tiempo</code></td>
+            <td>Segundos para responder</td>
+            <td>Opcional</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ==================== STEP 2: PREVIEW ==================== -->
+  <div *ngIf="currentStep === 'preview'" class="step-preview">
+    <div class="header">
+      <button (click)="goBack()" class="btn-back">← Volver</button>
+      <h2 class="title">Vista Previa de Preguntas</h2>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+      <div class="summary-card total">
+        <span class="card-number">{{ totalRows }}</span>
+        <span class="card-label">Total filas</span>
+      </div>
+      <div class="summary-card valid">
+        <span class="card-number">{{ validCount }}</span>
+        <span class="card-label">Válidas ✅</span>
+      </div>
+      <div class="summary-card invalid">
+        <span class="card-number">{{ invalidCount }}</span>
+        <span class="card-label">Con errores ❌</span>
+      </div>
+    </div>
+
+    <!-- Options -->
+    <div class="options-section">
+      <div class="option-group">
+        <label>Evento (opcional):</label>
+        <select [(ngModel)]="selectedEventId">
+          <option value="">Sin evento específico</option>
+          <option *ngFor="let event of events" [value]="event.id">{{ event.name }}</option>
+        </select>
+      </div>
+      <div class="option-group">
+        <label>Modo de juego:</label>
+        <select [(ngModel)]="selectedGameMode">
+          <option value="KAHOOT">Kahoot</option>
+          <option value="GEOPARTY">GeoParty</option>
+          <option value="">Todos los modos</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Invalid Questions Warning -->
+    <div *ngIf="invalidCount > 0" class="invalid-warning">
+      <h4>⚠️ Preguntas con errores ({{ invalidCount }}):</h4>
+      <div class="invalid-list">
+        <div *ngFor="let q of getInvalidQuestions()" class="invalid-item">
+          <span class="row-number">Fila {{ q.rowNumber }}:</span>
+          <span class="error-text">{{ q.errors.join(', ') }}</span>
+        </div>
+      </div>
+      <p class="invalid-note">Estas preguntas NO se guardarán</p>
+    </div>
+
+    <!-- Preview Table -->
+    <div class="preview-table-container">
+      <table class="preview-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Pregunta</th>
+            <th>Opciones</th>
+            <th>Correcta</th>
+            <th>Categoría</th>
+            <th>Dificultad</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let q of getValidQuestions(); let i = index" [class.invalid-row]="!q.isValid">
+            <td>{{ i + 1 }}</td>
+            <td class="question-cell">{{ q.question | slice:0:60 }}{{ q.question.length > 60 ? '...' : '' }}</td>
+            <td class="options-cell">
+              <span class="option" [class.correct]="q.correctAnswer === 1">1. {{ q.option1 | slice:0:15 }}</span>
+              <span class="option" [class.correct]="q.correctAnswer === 2">2. {{ q.option2 | slice:0:15 }}</span>
+              <span class="option" [class.correct]="q.correctAnswer === 3">3. {{ q.option3 | slice:0:15 }}</span>
+              <span class="option" [class.correct]="q.correctAnswer === 4">4. {{ q.option4 | slice:0:15 }}</span>
+            </td>
+            <td class="correct-cell">{{ q.correctAnswer }}</td>
+            <td>{{ q.category }}</td>
+            <td>
+              <span class="difficulty-badge" [ngClass]="getDifficultyColor(q.difficulty)">
+                {{ q.difficulty }}
+              </span>
+            </td>
+            <td>
+              <span *ngIf="q.isValid" class="status-valid">✅</span>
+              <span *ngIf="!q.isValid" class="status-invalid">❌</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button (click)="goBack()" class="btn-cancel">Cancelar</button>
+      <button 
+        (click)="saveQuestions()" 
+        [disabled]="validCount === 0 || isLoading"
+        class="btn-save"
+      >
+        <span *ngIf="isLoading">Guardando...</span>
+        <span *ngIf="!isLoading">💾 Guardar {{ validCount }} preguntas</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== STEP 3: RESULT ==================== -->
+  <div *ngIf="currentStep === 'result'" class="step-result">
+    <div class="result-icon">🎉</div>
+    <h2 class="result-title">¡Preguntas Guardadas!</h2>
+    <p class="result-count">
+      Se guardaron <strong>{{ savedCount }}</strong> preguntas exitosamente
+    </p>
+
+    <div *ngIf="saveErrors.length > 0" class="save-errors">
+      <h4>Errores al guardar ({{ saveErrors.length }}):</h4>
+      <ul>
+        <li *ngFor="let err of saveErrors">
+          Fila {{ err.row }}: {{ err.error }}
+        </li>
+      </ul>
+    </div>
+
+    <div class="result-actions">
+      <button (click)="reset()" class="btn-primary">
+        📁 Cargar más preguntas
+      </button>
+    </div>
+  </div>
+</div>

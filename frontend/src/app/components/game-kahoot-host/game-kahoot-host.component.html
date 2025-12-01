@@ -1,422 +1,722 @@
-<div class="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900">
-  
-  <!-- ==================== SETUP PHASE ==================== -->
-  <div *ngIf="gamePhase === 'setup'" class="flex items-center justify-center min-h-screen p-4">
-    <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full">
+<!-- MENU PHASE - Saved Games List -->
+<div *ngIf="gamePhase === 'menu'" class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+  <div class="max-w-4xl mx-auto">
+    
+    <!-- Header -->
+    <div class="text-center mb-10">
+      <h1 class="text-4xl font-bold text-white mb-2">Panel de Control</h1>
+      <p class="text-purple-200">Gestiona tus partidas de trivia</p>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="flex justify-center gap-4 mb-10">
+      <button 
+        (click)="goToSetup()" 
+        class="flex items-center gap-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-4 px-8 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-200">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        <span>Nueva Partida</span>
+      </button>
+      
+      <button 
+        (click)="loadSavedGames()" 
+        class="flex items-center gap-3 bg-slate-700/50 hover:bg-slate-600/50 text-white font-semibold py-4 px-8 rounded-xl border border-slate-600 transform hover:scale-105 transition-all duration-200">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        <span>Actualizar</span>
+      </button>
+    </div>
+
+    <!-- Saved Games Section -->
+    <div class="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700 p-6">
+      <div class="flex items-center gap-3 mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+        </svg>
+        <h2 class="text-xl font-semibold text-white">Partidas Guardadas</h2>
+        <span class="ml-auto bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-sm">
+          {{ savedGames.length }} partidas
+        </span>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="savedGames.length === 0" class="text-center py-12">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-slate-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+        </svg>
+        <p class="text-slate-400 text-lg">No hay partidas guardadas</p>
+        <p class="text-slate-500 text-sm mt-2">Crea una nueva partida para comenzar</p>
+      </div>
+
+      <!-- Games List -->
+      <div *ngIf="savedGames.length > 0" class="space-y-3">
+        <div *ngFor="let game of savedGames" 
+             class="bg-slate-700/50 rounded-xl p-4 border border-slate-600 hover:border-purple-500/50 transition-all duration-200">
+          <div class="flex items-center justify-between">
+            <div class="flex-1">
+              <div class="flex items-center gap-3">
+                <h3 class="text-white font-semibold text-lg">{{ game.gameName || 'Partida sin nombre' }}</h3>
+                <span [ngClass]="{
+                  'bg-green-500/20 text-green-400': game.status === 'active' || game.status === 'waiting',
+                  'bg-yellow-500/20 text-yellow-400': game.status === 'paused',
+                  'bg-slate-500/20 text-slate-400': game.status === 'finished'
+                }" class="px-2 py-0.5 rounded-full text-xs font-medium">
+                  {{ game.status === 'waiting' ? 'En espera' : game.status === 'active' ? 'Activo' : game.status === 'paused' ? 'Pausado' : 'Finalizado' }}
+                </span>
+              </div>
+              <div class="flex items-center gap-4 mt-2 text-sm text-slate-400">
+                <span class="flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                  </svg>
+                  {{ game.roomCode }}
+                </span>
+                <span class="flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  {{ game.participantCount || 0 }} jugadores
+                </span>
+                <span class="flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {{ game.createdAt | date:'short' }}
+                </span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button 
+                *ngIf="game.status !== 'finished'"
+                (click)="resumeGame(game)"
+                class="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Continuar
+              </button>
+              <button 
+                (click)="deleteSavedGame(game.gameId)"
+                class="flex items-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SETUP PHASE -->
+<div *ngIf="gamePhase === 'setup'" class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+  <div class="max-w-2xl mx-auto">
+    
+    <!-- Back Button -->
+    <button 
+      (click)="goToMenu()" 
+      class="flex items-center gap-2 text-slate-400 hover:text-white mb-6 transition-colors">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+      <span>Volver al menú</span>
+    </button>
+
+    <!-- Setup Card -->
+    <div class="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700 p-8">
       <div class="text-center mb-8">
-        <div class="text-6xl mb-4">🎮</div>
-        <h1 class="text-3xl font-bold text-gray-800">Crear Juego Kahoot</h1>
-        <p class="text-gray-500 mt-2">Configura tu trivia interactiva</p>
+        <div class="w-16 h-16 bg-purple-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+          </svg>
+        </div>
+        <h1 class="text-3xl font-bold text-white mb-2">Configurar Partida</h1>
+        <p class="text-slate-400">Personaliza tu juego de trivia</p>
       </div>
 
       <div class="space-y-6">
         <!-- Game Name -->
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2">Nombre del Juego</label>
+          <label class="block text-sm font-medium text-slate-300 mb-2">Nombre de la partida</label>
           <input 
             type="text" 
             [(ngModel)]="gameName"
-            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition-colors"
-            placeholder="Ej: Trivia de Ciencias"
-          />
+            placeholder="Ej: Trivia de viernes"
+            class="w-full bg-slate-700/50 border border-slate-600 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all">
+        </div>
+
+        <!-- Event Selection -->
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-2">Evento</label>
+          <select 
+            [(ngModel)]="selectedEventId"
+            (change)="onEventChange()"
+            class="w-full bg-slate-700/50 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all appearance-none cursor-pointer">
+            <option value="">Seleccionar evento</option>
+            <option *ngFor="let event of events" [value]="event.id">{{ event.name }}</option>
+          </select>
         </div>
 
         <!-- Number of Questions -->
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2">Número de Preguntas</label>
-          <select 
-            [(ngModel)]="totalQuestions"
-            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition-colors"
-          >
-            <option [value]="5">5 preguntas</option>
-            <option [value]="10">10 preguntas</option>
-            <option [value]="15">15 preguntas</option>
-            <option [value]="20">20 preguntas</option>
-          </select>
+          <label class="block text-sm font-medium text-slate-300 mb-2">Número de preguntas</label>
+          <div class="flex items-center gap-4">
+            <input 
+              type="range" 
+              [(ngModel)]="questionCount" 
+              min="5" 
+              max="30" 
+              step="5"
+              class="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-500">
+            <span class="w-16 text-center bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-white font-semibold">
+              {{ questionCount }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Time per Question -->
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-2">Tiempo por pregunta (segundos)</label>
+          <div class="flex items-center gap-4">
+            <input 
+              type="range" 
+              [(ngModel)]="timePerQuestion" 
+              min="10" 
+              max="60" 
+              step="5"
+              class="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-500">
+            <span class="w-16 text-center bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-white font-semibold">
+              {{ timePerQuestion }}s
+            </span>
+          </div>
         </div>
 
         <!-- Create Button -->
         <button 
           (click)="createGame()"
-          [disabled]="isLoading || !gameName.trim()"
-          class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-        >
-          {{ isLoading ? '⏳ Creando...' : '🚀 Crear Juego' }}
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==================== LOBBY PHASE ==================== -->
-  <div *ngIf="gamePhase === 'lobby'" class="min-h-screen p-6">
-    <!-- Header -->
-    <div class="max-w-6xl mx-auto">
-      <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
-        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div class="text-center md:text-left">
-            <h1 class="text-2xl font-bold text-gray-800">{{ gameName }}</h1>
-            <p class="text-gray-500">Esperando jugadores...</p>
-          </div>
-          
-          <!-- Room Code Display -->
-          <div class="text-center bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-8 py-4 rounded-2xl">
-            <p class="text-sm font-medium opacity-80">Código PIN</p>
-            <p class="text-5xl font-black tracking-wider">{{ roomCode }}</p>
-          </div>
-          
-          <div class="flex gap-2">
-            <button 
-              (click)="copyRoomCode()"
-              class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg transition-colors"
-            >
-              📋 Copiar
-            </button>
-            <button 
-              (click)="toggleQRCode()"
-              class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg transition-colors"
-            >
-              {{ showQRCode ? '❌ Ocultar QR' : '📱 Mostrar QR' }}
-            </button>
-          </div>
-        </div>
-
-        <!-- QR Code -->
-        <div *ngIf="showQRCode" class="mt-6 flex justify-center">
-          <div class="bg-white p-4 rounded-xl shadow-lg">
-            <qrcode 
-              [qrdata]="getJoinUrl()" 
-              [width]="200" 
-              [errorCorrectionLevel]="'M'"
-            ></qrcode>
-            <p class="text-xs text-gray-500 text-center mt-2">Escanea para unirte</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Join Instructions -->
-      <div class="bg-gradient-to-r from-yellow-400 to-orange-400 rounded-2xl p-6 mb-6 text-center">
-        <p class="text-2xl font-bold text-white mb-2">¡Únete en tu dispositivo!</p>
-        <p class="text-white text-lg">
-          Visita <span class="font-mono bg-white/20 px-2 py-1 rounded">{{ getJoinUrl() }}</span>
-        </p>
-        <p class="text-white/80 mt-2">o ingresa el código <span class="font-bold">{{ roomCode }}</span></p>
-      </div>
-
-      <!-- Participants Grid -->
-      <div class="bg-white rounded-2xl shadow-xl p-6">
-        <h2 class="text-2xl font-bold text-gray-800 mb-4">
-          Jugadores Conectados ({{ participants.length }})
-        </h2>
-        
-        <div *ngIf="participants.length === 0" class="text-center py-12">
-          <div class="text-6xl mb-4 animate-bounce">👥</div>
-          <p class="text-gray-500 text-lg">Esperando jugadores...</p>
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          <div 
-            *ngFor="let participant of participants; let i = index"
-            class="bg-gradient-to-br from-purple-500 to-indigo-500 rounded-xl p-4 text-center text-white transform hover:scale-105 transition-transform animate-fade-in"
-            [style.animation-delay.ms]="i * 100"
-          >
-            <div class="text-3xl mb-2">{{ ['😎','🤓','🧐','😊','🤩','😁','🥳','🤗'][i % 8] }}</div>
-            <p class="font-semibold truncate">{{ participant.userName }}</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Start Game Button -->
-      <div class="mt-6 text-center">
-        <button 
-          (click)="startGame()"
-          [disabled]="isLoading || participants.length < 1"
-          class="bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold text-xl py-4 px-12 rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
-        >
-          {{ isLoading ? '⏳ Iniciando...' : '🎯 Iniciar Juego' }}
-        </button>
-        <p *ngIf="participants.length < 1" class="text-white/70 mt-2">
-          Se necesita al menos 1 jugador
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==================== COUNTDOWN PHASE ==================== -->
-  <div *ngIf="gamePhase === 'countdown'" class="flex items-center justify-center min-h-screen">
-    <div class="text-center">
-      <div class="text-[200px] font-black text-white animate-pulse">
-        {{ countdownValue }}
-      </div>
-      <p class="text-3xl text-white/80">¡Prepárense!</p>
-    </div>
-  </div>
-
-  <!-- ==================== QUESTION PHASE ==================== -->
-  <div *ngIf="gamePhase === 'question'" class="min-h-screen p-4">
-    <div class="max-w-6xl mx-auto">
-      <!-- Top Bar -->
-      <div class="flex items-center justify-between mb-4">
-        <div class="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2 text-white">
-          <span class="font-semibold">Pregunta {{ questionNumber }} / {{ totalQuestions }}</span>
-        </div>
-        
-        <!-- Timer Circle -->
-        <div class="relative w-20 h-20">
-          <svg class="transform -rotate-90 w-20 h-20">
-            <circle 
-              cx="40" cy="40" r="35" 
-              stroke="rgba(255,255,255,0.3)" 
-              stroke-width="6" 
-              fill="transparent"
-            />
-            <circle 
-              cx="40" cy="40" r="35" 
-              [attr.stroke]="getTimerColor()" 
-              stroke-width="6" 
-              fill="transparent"
-              [style.stroke-dasharray]="220"
-              [style.stroke-dashoffset]="220 * (1 - timerProgress / 100)"
-              class="transition-all duration-1000"
-            />
+          [disabled]="!selectedEventId"
+          class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-slate-600 disabled:to-slate-700 disabled:cursor-not-allowed text-white font-semibold py-4 rounded-xl shadow-lg transform hover:scale-[1.02] transition-all duration-200 flex items-center justify-center gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
-          <div class="absolute inset-0 flex items-center justify-center">
-            <span class="text-2xl font-bold text-white">{{ timeRemaining }}</span>
-          </div>
-        </div>
-        
-        <div class="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2 text-white">
-          <span class="font-semibold">{{ answersReceived }} / {{ participants.length }} respuestas</span>
-        </div>
-      </div>
-
-      <!-- Question Card -->
-      <div class="bg-white rounded-2xl shadow-2xl p-8 mb-6" *ngIf="currentQuestion">
-        <!-- Category & Difficulty -->
-        <div class="flex items-center justify-center gap-4 mb-6">
-          <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">
-            {{ currentQuestion.category }}
-          </span>
-          <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-semibold">
-            {{ currentQuestion.difficulty }}
-          </span>
-          <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
-            {{ currentQuestion.points }} pts
-          </span>
-        </div>
-        
-        <!-- Question Text -->
-        <h2 class="text-3xl md:text-4xl font-bold text-gray-800 text-center leading-tight">
-          {{ currentQuestion.question }}
-        </h2>
-      </div>
-
-      <!-- Options Grid -->
-      <div class="grid grid-cols-2 gap-4" *ngIf="currentQuestion">
-        <div 
-          *ngFor="let option of currentQuestion.options; let i = index"
-          [class]="optionColors[i].bg + ' rounded-2xl p-6 text-white shadow-lg transform hover:scale-102 transition-transform'"
-        >
-          <div class="flex items-center gap-4">
-            <span class="text-4xl">{{ optionColors[i].icon }}</span>
-            <span class="text-xl md:text-2xl font-semibold flex-1">{{ option }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Skip Button -->
-      <div class="mt-6 text-center">
-        <button 
-          (click)="showAnswerReveal()"
-          class="bg-white/20 backdrop-blur-sm text-white px-6 py-2 rounded-lg hover:bg-white/30 transition-colors"
-        >
-          ⏭️ Mostrar Respuesta
+          <span>Crear Partida</span>
         </button>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- ==================== ANSWER REVEAL PHASE ==================== -->
-  <div *ngIf="gamePhase === 'answer-reveal'" class="min-h-screen p-4">
-    <div class="max-w-6xl mx-auto">
-      <!-- Question Recap -->
-      <div class="bg-white rounded-2xl shadow-xl p-6 mb-6" *ngIf="currentQuestion">
-        <h2 class="text-2xl font-bold text-gray-800 text-center mb-4">
-          {{ currentQuestion.question }}
-        </h2>
-        
-        <!-- Options with Results -->
-        <div class="grid grid-cols-2 gap-4">
-          <div 
-            *ngFor="let option of currentQuestion.options; let i = index"
-            [class]="'rounded-xl p-4 transition-all ' + 
-              (i === currentQuestion.correctAnswer 
-                ? 'bg-green-500 text-white ring-4 ring-green-300 transform scale-105' 
-                : 'bg-gray-200 text-gray-700')"
-          >
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <span class="text-2xl">{{ optionColors[i].icon }}</span>
-                <span class="font-semibold">{{ option }}</span>
-              </div>
-              <div class="text-right">
-                <div class="font-bold text-lg">{{ answerDistribution[i] }}</div>
-                <div class="text-sm opacity-80">{{ getAnswerPercentage(i) }}%</div>
-              </div>
-            </div>
-            <!-- Progress Bar -->
-            <div class="mt-2 bg-black/20 rounded-full h-2">
-              <div 
-                class="bg-white/50 h-2 rounded-full transition-all duration-500"
-                [style.width.%]="getAnswerPercentage(i)"
-              ></div>
-            </div>
-            <!-- Correct Answer Indicator -->
-            <div *ngIf="i === currentQuestion.correctAnswer" class="mt-2 text-center">
-              <span class="text-2xl">✅ Respuesta Correcta</span>
-            </div>
-          </div>
-        </div>
+<!-- LOBBY PHASE -->
+<div *ngIf="gamePhase === 'lobby'" class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+  <div class="max-w-5xl mx-auto">
+    
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-white">{{ gameName || 'Sala de espera' }}</h1>
+        <p class="text-slate-400 mt-1">Esperando jugadores...</p>
       </div>
-
-      <!-- Action Button -->
-      <div class="text-center">
+      <div class="flex items-center gap-4">
         <button 
-          (click)="showLeaderboard()"
-          class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-xl py-4 px-12 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-lg"
-        >
-          🏆 Ver Clasificación
+          (click)="goToMenu()"
+          class="flex items-center gap-2 bg-slate-700/50 hover:bg-slate-600/50 text-white px-4 py-2 rounded-lg border border-slate-600 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+          </svg>
+          <span>Guardar</span>
         </button>
       </div>
     </div>
-  </div>
 
-  <!-- ==================== LEADERBOARD PHASE ==================== -->
-  <div *ngIf="gamePhase === 'leaderboard'" class="min-h-screen p-4">
-    <div class="max-w-4xl mx-auto">
-      <div class="bg-white rounded-2xl shadow-2xl p-8">
-        <h2 class="text-4xl font-bold text-center text-gray-800 mb-8">🏆 Clasificación</h2>
+    <div class="grid md:grid-cols-3 gap-6">
+      
+      <!-- Join Info -->
+      <div class="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700 p-6">
+        <h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+          </svg>
+          Unirse al juego
+        </h2>
         
-        <!-- Top 5 -->
-        <div class="space-y-4">
-          <div 
-            *ngFor="let entry of leaderboard.slice(0, 5); let i = index"
-            class="flex items-center justify-between p-4 rounded-xl transition-all hover:scale-102"
-            [class.bg-yellow-100]="i === 0"
-            [class.bg-gray-100]="i === 1"
-            [class.bg-orange-100]="i === 2"
-            [class.bg-gray-50]="i > 2"
-          >
-            <div class="flex items-center gap-4">
-              <span class="text-4xl font-bold">{{ getRankMedal(entry.rank) }}</span>
-              <span class="text-xl font-semibold text-gray-800">{{ entry.userName }}</span>
-            </div>
-            <div class="text-right">
-              <span class="text-3xl font-bold text-purple-600">{{ entry.score }}</span>
-              <span class="text-gray-500 ml-1">pts</span>
+        <div class="text-center">
+          <!-- QR Code -->
+          <div class="bg-white rounded-xl p-4 mb-4 inline-block">
+            <qrcode [qrdata]="joinUrl" [width]="180" [errorCorrectionLevel]="'M'"></qrcode>
+          </div>
+          
+          <!-- Room Code -->
+          <div class="mb-4">
+            <p class="text-slate-400 text-sm mb-2">Código de sala</p>
+            <div class="bg-slate-700/50 border border-slate-600 rounded-xl px-6 py-3">
+              <span class="text-3xl font-bold text-white tracking-widest">{{ roomCode }}</span>
             </div>
           </div>
-        </div>
-
-        <!-- Action Button -->
-        <div class="mt-8 text-center">
+          
+          <!-- Copy URL Button -->
           <button 
-            (click)="nextQuestion()"
-            [disabled]="isLoading"
-            class="bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold text-xl py-4 px-12 rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all transform hover:scale-105 shadow-lg disabled:opacity-50"
-          >
-            {{ isLoading ? '⏳ Cargando...' : '➡️ Siguiente Pregunta' }}
+            (click)="copyJoinUrl()"
+            class="w-full flex items-center justify-center gap-2 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 hover:text-white px-4 py-2 rounded-lg border border-slate-600 transition-colors text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            Copiar enlace
           </button>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- ==================== FINAL RESULTS PHASE ==================== -->
-  <div *ngIf="gamePhase === 'final-results'" class="min-h-screen p-4">
-    <div class="max-w-5xl mx-auto">
-      <!-- Confetti Effect Header -->
-      <div class="text-center mb-8">
-        <div class="text-6xl mb-4">🎉🏆🎉</div>
-        <h1 class="text-5xl font-black text-white mb-2">¡Juego Terminado!</h1>
-        <p class="text-xl text-white/80">{{ gameName }}</p>
-      </div>
-
-      <!-- Podium -->
-      <div *ngIf="leaderboard.length >= 3" class="flex items-end justify-center gap-4 mb-8">
-        <!-- 2nd Place -->
-        <div class="text-center">
-          <div class="bg-gradient-to-b from-gray-300 to-gray-400 rounded-t-xl px-8 py-6 min-h-[150px] flex flex-col justify-end">
-            <div class="text-5xl mb-2">🥈</div>
-            <div class="text-xl font-bold text-white">{{ leaderboard[1].userName }}</div>
-            <div class="text-3xl font-black text-white">{{ leaderboard[1].score }}</div>
-          </div>
-          <div class="bg-gray-400 h-16 rounded-b-xl flex items-center justify-center">
-            <span class="text-3xl font-black text-white">2</span>
-          </div>
+      <!-- Participants -->
+      <div class="md:col-span-2 bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700 p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            Participantes
+          </h2>
+          <span class="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-sm font-medium">
+            {{ participants.length }} conectados
+          </span>
         </div>
 
-        <!-- 1st Place -->
-        <div class="text-center">
-          <div class="bg-gradient-to-b from-yellow-400 to-yellow-500 rounded-t-xl px-10 py-8 min-h-[200px] flex flex-col justify-end shadow-2xl">
-            <div class="text-6xl mb-2">🥇</div>
-            <div class="text-2xl font-bold text-white">{{ leaderboard[0].userName }}</div>
-            <div class="text-4xl font-black text-white">{{ leaderboard[0].score }}</div>
-          </div>
-          <div class="bg-yellow-500 h-20 rounded-b-xl flex items-center justify-center">
-            <span class="text-4xl font-black text-white">1</span>
-          </div>
+        <!-- Empty State -->
+        <div *ngIf="participants.length === 0" class="text-center py-12">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-slate-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <p class="text-slate-400 text-lg">Esperando jugadores</p>
+          <p class="text-slate-500 text-sm mt-2">Comparte el código o escanea el QR</p>
         </div>
 
-        <!-- 3rd Place -->
-        <div class="text-center">
-          <div class="bg-gradient-to-b from-orange-400 to-orange-500 rounded-t-xl px-6 py-4 min-h-[120px] flex flex-col justify-end">
-            <div class="text-4xl mb-2">🥉</div>
-            <div class="text-lg font-bold text-white">{{ leaderboard[2].userName }}</div>
-            <div class="text-2xl font-black text-white">{{ leaderboard[2].score }}</div>
-          </div>
-          <div class="bg-orange-500 h-12 rounded-b-xl flex items-center justify-center">
-            <span class="text-2xl font-black text-white">3</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Full Leaderboard -->
-      <div class="bg-white rounded-2xl shadow-2xl p-6">
-        <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center">Clasificación Final</h3>
-        <div class="space-y-3">
-          <div 
-            *ngFor="let entry of leaderboard"
-            class="flex items-center justify-between bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-colors"
-          >
-            <div class="flex items-center gap-4">
-              <span class="text-2xl font-bold w-12">{{ getRankMedal(entry.rank) }}</span>
-              <span class="text-lg font-semibold text-gray-800">{{ entry.userName }}</span>
+        <!-- Participants Grid -->
+        <div *ngIf="participants.length > 0" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 max-h-80 overflow-y-auto">
+          <div *ngFor="let participant of participants; let i = index" 
+               class="bg-slate-700/50 border border-slate-600 rounded-xl p-3 text-center animate-fadeIn"
+               [style.animation-delay]="i * 50 + 'ms'">
+            <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-2">
+              <span class="text-white font-bold text-lg">{{ participant.name?.charAt(0)?.toUpperCase() || '?' }}</span>
             </div>
-            <div class="text-right">
-              <span class="text-2xl font-bold text-purple-600">{{ entry.score }}</span>
-              <div class="text-sm text-gray-500">
-                {{ entry.correctAnswers }} correctas
-              </div>
-            </div>
+            <p class="text-white font-medium text-sm truncate">{{ participant.name || 'Anónimo' }}</p>
           </div>
         </div>
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="mt-8 flex justify-center gap-4">
-        <button 
-          (click)="newGame()"
-          class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 px-8 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-lg"
-        >
-          🎮 Nuevo Juego
-        </button>
-        <button 
-          (click)="router.navigate(['/'])"
-          class="bg-white text-gray-800 font-bold py-4 px-8 rounded-xl hover:bg-gray-100 transition-all shadow-lg"
-        >
-          🏠 Ir al Inicio
-        </button>
       </div>
     </div>
+
+    <!-- Start Button -->
+    <div class="mt-8 text-center">
+      <button 
+        (click)="startGame()"
+        [disabled]="participants.length === 0"
+        class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-slate-600 disabled:to-slate-700 disabled:cursor-not-allowed text-white font-bold py-4 px-12 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-200 text-xl flex items-center gap-3 mx-auto">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>Iniciar Juego</span>
+      </button>
+      <p *ngIf="participants.length === 0" class="text-slate-500 text-sm mt-3">
+        Necesitas al menos 1 jugador para iniciar
+      </p>
+    </div>
   </div>
+</div>
+
+<!-- COUNTDOWN PHASE -->
+<div *ngIf="gamePhase === 'countdown'" class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+  <div class="text-center">
+    <p class="text-purple-300 text-2xl mb-6">Preparándose...</p>
+    <div class="text-[12rem] font-bold text-white animate-pulse">
+      {{ countdownValue }}
+    </div>
+    <p class="text-slate-400 text-lg mt-6">La pregunta aparecerá pronto</p>
+  </div>
+</div>
+
+<!-- QUESTION PHASE -->
+<div *ngIf="gamePhase === 'question'" class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+  <div class="max-w-6xl mx-auto">
+    
+    <!-- Top Bar -->
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-4">
+        <span class="bg-purple-500/20 text-purple-300 px-4 py-2 rounded-lg font-medium">
+          Pregunta {{ currentQuestionIndex + 1 }} de {{ totalQuestions }}
+        </span>
+        <span class="bg-slate-700/50 text-slate-300 px-4 py-2 rounded-lg">
+          {{ currentQuestion?.category || 'General' }}
+        </span>
+      </div>
+      
+      <!-- Timer -->
+      <div class="flex items-center gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <div class="w-24 h-24 relative">
+          <svg class="w-full h-full transform -rotate-90">
+            <circle 
+              cx="48" cy="48" r="44" 
+              stroke="currentColor" 
+              stroke-width="8" 
+              fill="none" 
+              class="text-slate-700"/>
+            <circle 
+              cx="48" cy="48" r="44" 
+              stroke="currentColor" 
+              stroke-width="8" 
+              fill="none"
+              [attr.stroke-dasharray]="276.46"
+              [attr.stroke-dashoffset]="276.46 - (276.46 * timeRemaining / timePerQuestion)"
+              [ngClass]="{'text-green-500': timeRemaining > 10, 'text-yellow-500': timeRemaining <= 10 && timeRemaining > 5, 'text-red-500': timeRemaining <= 5}"
+              class="transition-all duration-1000"/>
+          </svg>
+          <span class="absolute inset-0 flex items-center justify-center text-2xl font-bold text-white">
+            {{ timeRemaining }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Question Card -->
+    <div class="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700 p-8 mb-8">
+      <h2 class="text-3xl md:text-4xl font-bold text-white text-center leading-relaxed">
+        {{ currentQuestion?.question || currentQuestion?.text }}
+      </h2>
+    </div>
+
+    <!-- Answer Options -->
+    <div class="grid md:grid-cols-2 gap-4">
+      <div *ngFor="let option of currentQuestion?.options; let i = index"
+           class="relative overflow-hidden rounded-xl p-6 transition-all duration-300"
+           [ngClass]="{
+             'bg-red-500': i === 0,
+             'bg-blue-500': i === 1,
+             'bg-yellow-500': i === 2,
+             'bg-green-500': i === 3
+           }">
+        <div class="flex items-center gap-4">
+          <span class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center text-2xl font-bold text-white">
+            {{ ['A', 'B', 'C', 'D'][i] }}
+          </span>
+          <span class="text-xl font-semibold text-white flex-1">{{ option }}</span>
+        </div>
+        
+        <!-- Answer Count Bar -->
+        <div class="mt-4 bg-white/20 rounded-full h-2 overflow-hidden">
+          <div class="bg-white/60 h-full transition-all duration-500"
+               [style.width]="getAnswerPercentage(i) + '%'">
+          </div>
+        </div>
+        <div class="flex justify-between text-white/80 text-sm mt-1">
+          <span>{{ getAnswerCount(i) }} respuestas</span>
+          <span>{{ getAnswerPercentage(i) | number:'1.0-0' }}%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="mt-8">
+      <div class="flex justify-between text-slate-400 text-sm mb-2">
+        <span>{{ answeredCount }} de {{ participants.length }} han respondido</span>
+        <span>{{ getProgressPercentage() | number:'1.0-0' }}%</span>
+      </div>
+      <div class="bg-slate-700/50 rounded-full h-3 overflow-hidden">
+        <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-full transition-all duration-300"
+             [style.width]="getProgressPercentage() + '%'">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ANSWER REVEAL PHASE -->
+<div *ngIf="gamePhase === 'answer-reveal'" class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+  <div class="max-w-6xl mx-auto">
+    
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <span class="bg-purple-500/20 text-purple-300 px-4 py-2 rounded-lg font-medium">
+        Pregunta {{ currentQuestionIndex + 1 }} de {{ totalQuestions }}
+      </span>
+    </div>
+
+    <!-- Question -->
+    <div class="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700 p-8 mb-8">
+      <h2 class="text-3xl font-bold text-white text-center">
+        {{ currentQuestion?.question || currentQuestion?.text }}
+      </h2>
+    </div>
+
+    <!-- Answer Options with Results -->
+    <div class="grid md:grid-cols-2 gap-4 mb-8">
+      <div *ngFor="let option of currentQuestion?.options; let i = index"
+           class="relative overflow-hidden rounded-xl p-6 transition-all duration-300"
+           [ngClass]="{
+             'ring-4 ring-white shadow-2xl scale-105': i === currentQuestion?.correctAnswer,
+             'opacity-50': i !== currentQuestion?.correctAnswer,
+             'bg-red-500': i === 0,
+             'bg-blue-500': i === 1,
+             'bg-yellow-500': i === 2,
+             'bg-green-500': i === 3
+           }">
+        <div class="flex items-center gap-4">
+          <span class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center text-2xl font-bold text-white">
+            {{ ['A', 'B', 'C', 'D'][i] }}
+          </span>
+          <span class="text-xl font-semibold text-white flex-1">{{ option }}</span>
+          <svg *ngIf="i === currentQuestion?.correctAnswer" 
+               xmlns="http://www.w3.org/2000/svg" 
+               class="h-10 w-10 text-white" 
+               fill="none" 
+               viewBox="0 0 24 24" 
+               stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        
+        <!-- Final Answer Count -->
+        <div class="mt-4 flex justify-between text-white/80">
+          <span class="font-semibold">{{ getAnswerCount(i) }} respuestas</span>
+          <span>{{ getAnswerPercentage(i) | number:'1.0-0' }}%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Correct Answer Message -->
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center gap-3 bg-green-500/20 border border-green-500/30 text-green-400 px-6 py-3 rounded-xl">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span class="text-lg font-semibold" *ngIf="currentQuestion">
+          La respuesta correcta era: {{ currentQuestion.options[currentQuestion.correctAnswer] }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Next Button -->
+    <div class="text-center">
+      <button 
+        (click)="nextQuestion()"
+        class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-4 px-12 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-200 text-xl flex items-center gap-3 mx-auto">
+        <span>{{ currentQuestionIndex + 1 < totalQuestions ? 'Siguiente Pregunta' : 'Ver Resultados' }}</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- LEADERBOARD PHASE -->
+<div *ngIf="gamePhase === 'leaderboard'" class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+  <div class="max-w-3xl mx-auto">
+    
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-white mb-2">Clasificación</h1>
+      <p class="text-slate-400">Después de {{ currentQuestionIndex + 1 }} preguntas</p>
+    </div>
+
+    <!-- Leaderboard -->
+    <div class="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700 p-6">
+      <div class="space-y-3">
+        <div *ngFor="let participant of getLeaderboard(); let i = index"
+             class="flex items-center gap-4 p-4 rounded-xl transition-all"
+             [ngClass]="{
+               'bg-gradient-to-r from-yellow-500/20 to-yellow-600/10 border border-yellow-500/30': i === 0,
+               'bg-gradient-to-r from-slate-400/20 to-slate-500/10 border border-slate-400/30': i === 1,
+               'bg-gradient-to-r from-orange-600/20 to-orange-700/10 border border-orange-600/30': i === 2,
+               'bg-slate-700/30 border border-slate-700': i > 2
+             }">
+          <!-- Rank -->
+          <div class="w-10 h-10 flex items-center justify-center rounded-full font-bold"
+               [ngClass]="{
+                 'bg-yellow-500 text-yellow-900': i === 0,
+                 'bg-slate-400 text-slate-900': i === 1,
+                 'bg-orange-600 text-orange-100': i === 2,
+                 'bg-slate-700 text-slate-300': i > 2
+               }">
+            {{ i + 1 }}
+          </div>
+          
+          <!-- Player Info -->
+          <div class="flex-1">
+            <p class="text-white font-semibold text-lg">{{ participant.name }}</p>
+            <p class="text-slate-400 text-sm">{{ participant.correctAnswers || 0 }} correctas</p>
+          </div>
+          
+          <!-- Score -->
+          <div class="text-right">
+            <p class="text-2xl font-bold text-white">{{ participant.score || 0 }}</p>
+            <p class="text-slate-400 text-sm">puntos</p>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="getLeaderboard().length === 0" class="text-center py-8">
+          <p class="text-slate-400">Sin puntuaciones aún</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Continue Button -->
+    <div class="mt-8 text-center">
+      <button 
+        (click)="nextQuestion()"
+        class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-4 px-12 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-200 text-xl flex items-center gap-3 mx-auto">
+        <span>Continuar</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- FINAL RESULTS PHASE -->
+<div *ngIf="gamePhase === 'final-results'" class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+  <div class="max-w-4xl mx-auto">
+    
+    <!-- Header -->
+    <div class="text-center mb-10">
+      <h1 class="text-5xl font-bold text-white mb-4">Resultados Finales</h1>
+      <p class="text-slate-400 text-lg">{{ gameName || 'Trivia' }} - {{ totalQuestions }} preguntas</p>
+    </div>
+
+    <!-- Podium -->
+    <div class="flex items-end justify-center gap-4 mb-10" *ngIf="getLeaderboard().length >= 1">
+      
+      <!-- 2nd Place -->
+      <div *ngIf="getLeaderboard()[1]" class="text-center">
+        <div class="w-24 h-24 bg-gradient-to-br from-slate-300 to-slate-500 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
+          <span class="text-3xl font-bold text-slate-800">{{ getLeaderboard()[1].name?.charAt(0)?.toUpperCase() }}</span>
+        </div>
+        <p class="text-white font-semibold text-lg mb-1">{{ getLeaderboard()[1].name }}</p>
+        <p class="text-2xl font-bold text-slate-300">{{ getLeaderboard()[1].score || 0 }}</p>
+        <div class="w-28 h-32 bg-gradient-to-t from-slate-500 to-slate-400 rounded-t-lg mt-4 flex items-center justify-center">
+          <span class="text-5xl font-bold text-white">2</span>
+        </div>
+      </div>
+
+      <!-- 1st Place -->
+      <div *ngIf="getLeaderboard()[0]" class="text-center -mb-8">
+        <div class="relative">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-yellow-400 mx-auto mb-2 animate-bounce" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+          <div class="w-32 h-32 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-xl ring-4 ring-yellow-300/50">
+            <span class="text-4xl font-bold text-yellow-900">{{ getLeaderboard()[0].name?.charAt(0)?.toUpperCase() }}</span>
+          </div>
+        </div>
+        <p class="text-white font-bold text-xl mb-1">{{ getLeaderboard()[0].name }}</p>
+        <p class="text-3xl font-bold text-yellow-400">{{ getLeaderboard()[0].score || 0 }}</p>
+        <div class="w-32 h-44 bg-gradient-to-t from-yellow-600 to-yellow-400 rounded-t-lg mt-4 flex items-center justify-center">
+          <span class="text-6xl font-bold text-white">1</span>
+        </div>
+      </div>
+
+      <!-- 3rd Place -->
+      <div *ngIf="getLeaderboard()[2]" class="text-center">
+        <div class="w-20 h-20 bg-gradient-to-br from-orange-500 to-orange-700 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
+          <span class="text-2xl font-bold text-orange-100">{{ getLeaderboard()[2].name?.charAt(0)?.toUpperCase() }}</span>
+        </div>
+        <p class="text-white font-semibold mb-1">{{ getLeaderboard()[2].name }}</p>
+        <p class="text-xl font-bold text-orange-400">{{ getLeaderboard()[2].score || 0 }}</p>
+        <div class="w-24 h-24 bg-gradient-to-t from-orange-700 to-orange-500 rounded-t-lg mt-4 flex items-center justify-center">
+          <span class="text-4xl font-bold text-white">3</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Full Leaderboard -->
+    <div class="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700 p-6">
+      <h2 class="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        Todos los participantes
+      </h2>
+      
+      <div class="space-y-2">
+        <div *ngFor="let participant of getLeaderboard(); let i = index"
+             class="flex items-center gap-4 p-3 bg-slate-700/30 rounded-lg">
+          <span class="w-8 text-center font-bold"
+                [ngClass]="{
+                  'text-yellow-400': i === 0,
+                  'text-slate-300': i === 1,
+                  'text-orange-400': i === 2,
+                  'text-slate-500': i > 2
+                }">
+            {{ i + 1 }}
+          </span>
+          <span class="flex-1 text-white">{{ participant.name }}</span>
+          <span class="text-slate-400">{{ participant.correctAnswers || 0 }}/{{ totalQuestions }}</span>
+          <span class="font-bold text-purple-400 w-20 text-right">{{ participant.score || 0 }} pts</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="mt-8 flex justify-center gap-4">
+      <button 
+        (click)="goToMenu()"
+        class="flex items-center gap-2 bg-slate-700/50 hover:bg-slate-600/50 text-white font-semibold py-3 px-8 rounded-xl border border-slate-600 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        </svg>
+        Volver al menú
+      </button>
+      <button 
+        (click)="playAgain()"
+        class="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 px-8 rounded-xl shadow-lg transition-all">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        Jugar de nuevo
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div *ngIf="isLoading" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50">
+  <div class="text-center">
+    <div class="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+    <p class="text-white text-lg">Cargando...</p>
+  </div>
+</div>
+
+<!-- Error Message -->
+<div *ngIf="errorMessage" 
+     class="fixed bottom-6 right-6 bg-red-500/90 backdrop-blur-sm text-white px-6 py-4 rounded-xl shadow-xl flex items-center gap-3 animate-slideIn z-50">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+  <span>{{ errorMessage }}</span>
+  <button (click)="errorMessage = ''" class="ml-2 hover:bg-white/20 p-1 rounded">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  </button>
+</div>
+
+<!-- Success Message -->
+<div *ngIf="successMessage" 
+     class="fixed bottom-6 right-6 bg-green-500/90 backdrop-blur-sm text-white px-6 py-4 rounded-xl shadow-xl flex items-center gap-3 animate-slideIn z-50">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+  <span>{{ successMessage }}</span>
+  <button (click)="successMessage = ''" class="ml-2 hover:bg-white/20 p-1 rounded">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  </button>
 </div>
